@@ -8,7 +8,7 @@ and auto-approval, and unsafe tool calls (command / argument injection, path tra
 A local script finds the candidates; your agent judges each one and adds what no script can see; every verdict must quote the exact
 code, and a second command rejects quotes that are not really there.
 
-**[Get it on Agensi ($19)](https://www.agensi.io/creators/muhammad-shahmeer)** · **[Results page](https://m-shahmeer-kz.github.io/agent-mcp-security-auditor/)**
+**[Get it on Agensi ($19)](https://www.agensi.io/skills/agent-mcp-security-auditor-is-your-ai-agent-safe-to-ship)** · **[Results page](https://m-shahmeer-kz.github.io/agent-mcp-security-auditor/)**
 
 This repository is the public showcase: true test results, every verdict and report from the blind test, and a real example audit.
 The skill itself is sold on Agensi.
