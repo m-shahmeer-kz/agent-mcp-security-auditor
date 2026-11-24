@@ -1,0 +1,793 @@
+[
+ {
+  "rule": "ARG-INJECTION",
+  "severity": "info",
+  "file": "src/tools/kubectl-apply.ts",
+  "line": 101,
+  "quote": "const result = execFileSync(command, args, {",
+  "message": "Tool input reaches a dangerous call: a program is started with arguments taken from tool input.",
+  "confidence": "high",
+  "owasp": "ASI02 Tool Misuse and Exploitation",
+  "fix": "See M006.",
+  "source_line": 205,
+  "source_quote": "server.setRequestHandler(",
+  "source_file": "src/index.ts",
+  "id": "F001",
+  "verdict": "false_positive",
+  "evidence": [
+   {
+    "file": "src/tools/kubectl-apply.ts",
+    "line": 78,
+    "quote": "args.push(\"-f\", input.filename);"
+   }
+  ],
+  "reason": "Every tool value in kubectl apply sits in a flag-value slot (-f, -n, --context), so it cannot become a new flag. The free filename path/URL is covered separately in M006.",
+  "quotes_verified": 1
+ },
+ {
+  "rule": "ARG-INJECTION",
+  "severity": "high",
+  "file": "src/tools/kubectl-delete.ts",
+  "line": 159,
+  "quote": "const result = execFileSync(command, args, {",
+  "message": "Tool input reaches a dangerous call: a program is started with arguments taken from tool input.",
+  "confidence": "high",
+  "owasp": "ASI02 Tool Misuse and Exploitation",
+  "fix": "Validate resourceType/name against ^[a-z0-9]([-a-z0-9.]*[a-z0-9])?$ (DNS-1123) and reject values starting with '-'; put '--' before positional arguments where kubectl allows it.",
+  "source_line": 205,
+  "source_quote": "server.setRequestHandler(",
+  "source_file": "src/index.ts",
+  "id": "F002",
+  "verdict": "confirmed",
+  "evidence": [
+   {
+    "file": "src/index.ts",
+    "line": 212,
+    "quote": "const { name, arguments: input = {} } = request.params;"
+   },
+   {
+    "file": "src/tools/kubectl-delete.ts",
+    "line": 123,
+    "quote": "args.push(input.name);"
+   }
+  ],
+  "reason": "input.resourceType / input.name comes straight from the tool arguments and is placed as a positional kubectl argument with no '--' separator and no check for a leading '-', so kubectl parses it as a flag (e.g. '--kubeconfig=<path>' to load another kubeconfig whose exec plugin runs on the host, '--server=https://attacker' to send the cluster credentials elsewhere, '--as=...' to impersonate).",
+  "quotes_verified": 2
+ },
+ {
+  "rule": "ARG-INJECTION",
+  "severity": "high",
+  "file": "src/tools/kubectl-describe.ts",
+  "line": 75,
+  "quote": "const result = execFileSync(command, args, {",
+  "message": "Tool input reaches a dangerous call: a program is started with arguments taken from tool input.",
+  "confidence": "high",
+  "owasp": "ASI02 Tool Misuse and Exploitation",
+  "fix": "Validate resourceType/name against ^[a-z0-9]([-a-z0-9.]*[a-z0-9])?$ (DNS-1123) and reject values starting with '-'; put '--' before positional arguments where kubectl allows it.",
+  "source_line": 205,
+  "source_quote": "server.setRequestHandler(",
+  "source_file": "src/index.ts",
+  "id": "F003",
+  "verdict": "confirmed",
+  "evidence": [
+   {
+    "file": "src/index.ts",
+    "line": 212,
+    "quote": "const { name, arguments: input = {} } = request.params;"
+   },
+   {
+    "file": "src/tools/kubectl-describe.ts",
+    "line": 60,
+    "quote": "const args = [\"describe\", resourceType, name];"
+   }
+  ],
+  "reason": "resourceType / name comes straight from the tool arguments and is placed as a positional kubectl argument with no '--' separator and no check for a leading '-', so kubectl parses it as a flag (e.g. '--kubeconfig=<path>' to load another kubeconfig whose exec plugin runs on the host, '--server=https://attacker' to send the cluster credentials elsewhere, '--as=...' to impersonate).",
+  "quotes_verified": 2
+ },
+ {
+  "rule": "ARG-INJECTION",
+  "severity": "high",
+  "file": "src/tools/kubectl-get.ts",
+  "line": 158,
+  "quote": "const result = execFileSync(command, args, {",
+  "message": "Tool input reaches a dangerous call: a program is started with arguments taken from tool input.",
+  "confidence": "high",
+  "owasp": "ASI02 Tool Misuse and Exploitation",
+  "fix": "Validate resourceType/name against ^[a-z0-9]([-a-z0-9.]*[a-z0-9])?$ (DNS-1123) and reject values starting with '-'; put '--' before positional arguments where kubectl allows it.",
+  "source_line": 205,
+  "source_quote": "server.setRequestHandler(",
+  "source_file": "src/index.ts",
+  "id": "F004",
+  "verdict": "confirmed",
+  "evidence": [
+   {
+    "file": "src/index.ts",
+    "line": 212,
+    "quote": "const { name, arguments: input = {} } = request.params;"
+   },
+   {
+    "file": "src/tools/kubectl-get.ts",
+    "line": 94,
+    "quote": "args.push(name);"
+   }
+  ],
+  "reason": "resourceType / name comes straight from the tool arguments and is placed as a positional kubectl argument with no '--' separator and no check for a leading '-', so kubectl parses it as a flag (e.g. '--kubeconfig=<path>' to load another kubeconfig whose exec plugin runs on the host, '--server=https://attacker' to send the cluster credentials elsewhere, '--as=...' to impersonate).",
+  "quotes_verified": 2
+ },
+ {
+  "rule": "ARG-INJECTION",
+  "severity": "high",
+  "file": "src/tools/kubectl-logs.ts",
+  "line": 116,
+  "quote": "const result = execFileSync(command, args, {",
+  "message": "Tool input reaches a dangerous call: a program is started with arguments taken from tool input.",
+  "confidence": "high",
+  "owasp": "ASI02 Tool Misuse and Exploitation",
+  "fix": "Validate resourceType/name against ^[a-z0-9]([-a-z0-9.]*[a-z0-9])?$ (DNS-1123) and reject values starting with '-'; put '--' before positional arguments where kubectl allows it.",
+  "source_line": 205,
+  "source_quote": "server.setRequestHandler(",
+  "source_file": "src/index.ts",
+  "id": "F005",
+  "verdict": "confirmed",
+  "evidence": [
+   {
+    "file": "src/index.ts",
+    "line": 212,
+    "quote": "const { name, arguments: input = {} } = request.params;"
+   },
+   {
+    "file": "src/tools/kubectl-logs.ts",
+    "line": 99,
+    "quote": "let args = [\"-n\", namespace, \"logs\", name];"
+   }
+  ],
+  "reason": "name comes straight from the tool arguments and is placed as a positional kubectl argument with no '--' separator and no check for a leading '-', so kubectl parses it as a flag (e.g. '--kubeconfig=<path>' to load another kubeconfig whose exec plugin runs on the host, '--server=https://attacker' to send the cluster credentials elsewhere, '--as=...' to impersonate).",
+  "quotes_verified": 2
+ },
+ {
+  "rule": "ARG-INJECTION",
+  "severity": "high",
+  "file": "src/tools/kubectl-patch.ts",
+  "line": 131,
+  "quote": "const result = execFileSync(command, args, {",
+  "message": "Tool input reaches a dangerous call: a program is started with arguments taken from tool input.",
+  "confidence": "high",
+  "owasp": "ASI02 Tool Misuse and Exploitation",
+  "fix": "Validate resourceType/name against ^[a-z0-9]([-a-z0-9.]*[a-z0-9])?$ (DNS-1123) and reject values starting with '-'; put '--' before positional arguments where kubectl allows it.",
+  "source_line": 205,
+  "source_quote": "server.setRequestHandler(",
+  "source_file": "src/index.ts",
+  "id": "F006",
+  "verdict": "confirmed",
+  "evidence": [
+   {
+    "file": "src/index.ts",
+    "line": 212,
+    "quote": "const { name, arguments: input = {} } = request.params;"
+   },
+   {
+    "file": "src/tools/kubectl-patch.ts",
+    "line": 84,
+    "quote": "const args = [\"patch\", input.resourceType, input.name, \"-n\", namespace];"
+   }
+  ],
+  "reason": "input.resourceType / input.name comes straight from the tool arguments and is placed as a positional kubectl argument with no '--' separator and no check for a leading '-', so kubectl parses it as a flag (e.g. '--kubeconfig=<path>' to load another kubeconfig whose exec plugin runs on the host, '--server=https://attacker' to send the cluster credentials elsewhere, '--as=...' to impersonate).",
+  "quotes_verified": 2
+ },
+ {
+  "rule": "ARG-INJECTION",
+  "severity": "high",
+  "file": "src/tools/kubectl-rollout.ts",
+  "line": 114,
+  "quote": "const result = execFileSync(command, args, {",
+  "message": "Tool input reaches a dangerous call: a program is started with arguments taken from tool input.",
+  "confidence": "high",
+  "owasp": "ASI02 Tool Misuse and Exploitation",
+  "fix": "Validate resourceType/name against ^[a-z0-9]([-a-z0-9.]*[a-z0-9])?$ (DNS-1123) and reject values starting with '-'; put '--' before positional arguments where kubectl allows it.",
+  "source_line": 205,
+  "source_quote": "server.setRequestHandler(",
+  "source_file": "src/index.ts",
+  "id": "F007",
+  "verdict": "confirmed",
+  "evidence": [
+   {
+    "file": "src/index.ts",
+    "line": 212,
+    "quote": "const { name, arguments: input = {} } = request.params;"
+   },
+   {
+    "file": "src/tools/kubectl-rollout.ts",
+    "line": 80,
+    "quote": "input.subCommand,"
+   }
+  ],
+  "reason": "input.subCommand (not enum-checked at runtime) comes straight from the tool arguments and is placed as a positional kubectl argument with no '--' separator and no check for a leading '-', so kubectl parses it as a flag (e.g. '--kubeconfig=<path>' to load another kubeconfig whose exec plugin runs on the host, '--server=https://attacker' to send the cluster credentials elsewhere, '--as=...' to impersonate).",
+  "quotes_verified": 2
+ },
+ {
+  "rule": "ARG-INJECTION",
+  "severity": "high",
+  "file": "src/tools/kubectl-rollout.ts",
+  "line": 132,
+  "quote": "const result = execFileSync(command, args, {",
+  "message": "Tool input reaches a dangerous call: a program is started with arguments taken from tool input.",
+  "confidence": "high",
+  "owasp": "ASI02 Tool Misuse and Exploitation",
+  "fix": "Validate resourceType/name against ^[a-z0-9]([-a-z0-9.]*[a-z0-9])?$ (DNS-1123) and reject values starting with '-'; put '--' before positional arguments where kubectl allows it.",
+  "source_line": 205,
+  "source_quote": "server.setRequestHandler(",
+  "source_file": "src/index.ts",
+  "id": "F008",
+  "verdict": "confirmed",
+  "evidence": [
+   {
+    "file": "src/index.ts",
+    "line": 212,
+    "quote": "const { name, arguments: input = {} } = request.params;"
+   },
+   {
+    "file": "src/tools/kubectl-rollout.ts",
+    "line": 81,
+    "quote": "`${input.resourceType}/${input.name}`,"
+   }
+  ],
+  "reason": "input.subCommand / input.resourceType comes straight from the tool arguments and is placed as a positional kubectl argument with no '--' separator and no check for a leading '-', so kubectl parses it as a flag (e.g. '--kubeconfig=<path>' to load another kubeconfig whose exec plugin runs on the host, '--server=https://attacker' to send the cluster credentials elsewhere, '--as=...' to impersonate).",
+  "quotes_verified": 2
+ },
+ {
+  "rule": "ARG-INJECTION",
+  "severity": "high",
+  "file": "src/tools/kubectl-scale.ts",
+  "line": 68,
+  "quote": "const result = execFileSync(command, args, {",
+  "message": "Tool input reaches a dangerous call: a program is started with arguments taken from tool input.",
+  "confidence": "high",
+  "owasp": "ASI02 Tool Misuse and Exploitation",
+  "fix": "Validate resourceType/name against ^[a-z0-9]([-a-z0-9.]*[a-z0-9])?$ (DNS-1123) and reject values starting with '-'; put '--' before positional arguments where kubectl allows it.",
+  "source_line": 205,
+  "source_quote": "server.setRequestHandler(",
+  "source_file": "src/index.ts",
+  "id": "F009",
+  "verdict": "confirmed",
+  "evidence": [
+   {
+    "file": "src/index.ts",
+    "line": 212,
+    "quote": "const { name, arguments: input = {} } = request.params;"
+   },
+   {
+    "file": "src/tools/kubectl-scale.ts",
+    "line": 56,
+    "quote": "input.name,"
+   }
+  ],
+  "reason": "resourceType / input.name comes straight from the tool arguments and is placed as a positional kubectl argument with no '--' separator and no check for a leading '-', so kubectl parses it as a flag (e.g. '--kubeconfig=<path>' to load another kubeconfig whose exec plugin runs on the host, '--server=https://attacker' to send the cluster credentials elsewhere, '--as=...' to impersonate).",
+  "quotes_verified": 2
+ },
+ {
+  "rule": "PATH-TRAVERSAL",
+  "severity": "info",
+  "file": "src/tools/kubectl-apply.ts",
+  "line": 75,
+  "quote": "fs.writeFileSync(tempFile, input.manifest);",
+  "message": "Tool input reaches a dangerous call: a file is written / deleted / moved at a path taken from tool input.",
+  "confidence": "medium",
+  "owasp": "ASI02 Tool Misuse and Exploitation",
+  "fix": "None needed (optionally use fs.mkdtempSync for a private temp dir).",
+  "source_line": 205,
+  "source_quote": "server.setRequestHandler(",
+  "source_file": "src/index.ts",
+  "id": "F010",
+  "verdict": "false_positive",
+  "evidence": [
+   {
+    "file": "src/tools/kubectl-apply.ts",
+    "line": 74,
+    "quote": "tempFile = path.join(tmpDir, `manifest-${Date.now()}.yaml`);"
+   }
+  ],
+  "reason": "The written path is built from os.tmpdir() and a timestamp only; the tool input is the file content, not the path, so there is no traversal.",
+  "quotes_verified": 1
+ },
+ {
+  "rule": "PATH-TRAVERSAL",
+  "severity": "info",
+  "file": "src/tools/kubectl-create.ts",
+  "line": 240,
+  "quote": "fs.writeFileSync(tempFile, input.manifest);",
+  "message": "Tool input reaches a dangerous call: a file is written / deleted / moved at a path taken from tool input.",
+  "confidence": "medium",
+  "owasp": "ASI02 Tool Misuse and Exploitation",
+  "fix": "None needed (optionally use fs.mkdtempSync for a private temp dir).",
+  "source_line": 205,
+  "source_quote": "server.setRequestHandler(",
+  "source_file": "src/index.ts",
+  "id": "F016",
+  "verdict": "false_positive",
+  "evidence": [
+   {
+    "file": "src/tools/kubectl-create.ts",
+    "line": 239,
+    "quote": "tempFile = path.join(tmpDir, `create-manifest-${Date.now()}.yaml`);"
+   }
+  ],
+  "reason": "The written path is built from os.tmpdir() and a timestamp only; the tool input is the file content, not the path, so there is no traversal.",
+  "quotes_verified": 1
+ },
+ {
+  "rule": "PATH-TRAVERSAL",
+  "severity": "info",
+  "file": "src/tools/kubectl-delete.ts",
+  "line": 114,
+  "quote": "fs.writeFileSync(tempFile, input.manifest);",
+  "message": "Tool input reaches a dangerous call: a file is written / deleted / moved at a path taken from tool input.",
+  "confidence": "medium",
+  "owasp": "ASI02 Tool Misuse and Exploitation",
+  "fix": "None needed (optionally use fs.mkdtempSync for a private temp dir).",
+  "source_line": 205,
+  "source_quote": "server.setRequestHandler(",
+  "source_file": "src/index.ts",
+  "id": "F017",
+  "verdict": "false_positive",
+  "evidence": [
+   {
+    "file": "src/tools/kubectl-delete.ts",
+    "line": 113,
+    "quote": "tempFile = path.join(tmpDir, `delete-manifest-${Date.now()}.yaml`);"
+   }
+  ],
+  "reason": "The written path is built from os.tmpdir() and a timestamp only; the tool input is the file content, not the path, so there is no traversal.",
+  "quotes_verified": 1
+ },
+ {
+  "rule": "PATH-TRAVERSAL",
+  "severity": "info",
+  "file": "src/tools/kubectl-patch.ts",
+  "line": 113,
+  "quote": "fs.writeFileSync(tempFile, JSON.stringify(input.patchData));",
+  "message": "Tool input reaches a dangerous call: a file is written / deleted / moved at a path taken from tool input.",
+  "confidence": "medium",
+  "owasp": "ASI02 Tool Misuse and Exploitation",
+  "fix": "None needed (optionally use fs.mkdtempSync for a private temp dir).",
+  "source_line": 205,
+  "source_quote": "server.setRequestHandler(",
+  "source_file": "src/index.ts",
+  "id": "F022",
+  "verdict": "false_positive",
+  "evidence": [
+   {
+    "file": "src/tools/kubectl-patch.ts",
+    "line": 112,
+    "quote": "tempFile = path.join(tmpDir, `patch-${Date.now()}.json`);"
+   }
+  ],
+  "reason": "The written path is built from os.tmpdir() and a timestamp only; the tool input is the file content, not the path, so there is no traversal.",
+  "quotes_verified": 1
+ },
+ {
+  "rule": "ARG-INJECTION",
+  "severity": "info",
+  "file": "src/tools/kubectl-context.ts",
+  "line": 77,
+  "quote": "const rawResult = execFileSync(command, listArgs, {",
+  "message": "Tool input reaches a dangerous call: a program is started with arguments taken from tool input.",
+  "confidence": "medium",
+  "owasp": "ASI02 Tool Misuse and Exploitation",
+  "fix": "None needed.",
+  "source_line": 205,
+  "source_quote": "server.setRequestHandler(",
+  "source_file": "src/index.ts",
+  "id": "F011",
+  "verdict": "false_positive",
+  "evidence": [
+   {
+    "file": "src/tools/kubectl-context.ts",
+    "line": 71,
+    "quote": "let listArgs = [\"config\", \"get-contexts\"];"
+   }
+  ],
+  "reason": "The argument list is fixed; no tool input reaches it.",
+  "quotes_verified": 1
+ },
+ {
+  "rule": "ARG-INJECTION",
+  "severity": "info",
+  "file": "src/tools/kubectl-context.ts",
+  "line": 146,
+  "quote": "result = execFileSync(command, listArgs, {",
+  "message": "Tool input reaches a dangerous call: a program is started with arguments taken from tool input.",
+  "confidence": "medium",
+  "owasp": "ASI02 Tool Misuse and Exploitation",
+  "fix": "None needed.",
+  "source_line": 205,
+  "source_quote": "server.setRequestHandler(",
+  "source_file": "src/index.ts",
+  "id": "F012",
+  "verdict": "false_positive",
+  "evidence": [
+   {
+    "file": "src/tools/kubectl-context.ts",
+    "line": 71,
+    "quote": "let listArgs = [\"config\", \"get-contexts\"];"
+   }
+  ],
+  "reason": "The argument list is fixed; no tool input reaches it.",
+  "quotes_verified": 1
+ },
+ {
+  "rule": "ARG-INJECTION",
+  "severity": "info",
+  "file": "src/tools/kubectl-context.ts",
+  "line": 167,
+  "quote": "const allContextsOutput = execFileSync(",
+  "message": "Tool input reaches a dangerous call: a program is started with arguments taken from tool input.",
+  "confidence": "medium",
+  "owasp": "ASI02 Tool Misuse and Exploitation",
+  "fix": "None needed.",
+  "source_line": 205,
+  "source_quote": "server.setRequestHandler(",
+  "source_file": "src/index.ts",
+  "id": "F013",
+  "verdict": "false_positive",
+  "evidence": [
+   {
+    "file": "src/tools/kubectl-context.ts",
+    "line": 169,
+    "quote": "[\"config\", \"get-contexts\"],"
+   }
+  ],
+  "reason": "The argument list is fixed; no tool input reaches it.",
+  "quotes_verified": 1
+ },
+ {
+  "rule": "ARG-INJECTION",
+  "severity": "info",
+  "file": "src/tools/kubectl-context.ts",
+  "line": 268,
+  "quote": "const allContextsOutput = execFileSync(",
+  "message": "Tool input reaches a dangerous call: a program is started with arguments taken from tool input.",
+  "confidence": "medium",
+  "owasp": "ASI02 Tool Misuse and Exploitation",
+  "fix": "None needed.",
+  "source_line": 205,
+  "source_quote": "server.setRequestHandler(",
+  "source_file": "src/index.ts",
+  "id": "F014",
+  "verdict": "false_positive",
+  "evidence": [
+   {
+    "file": "src/tools/kubectl-context.ts",
+    "line": 270,
+    "quote": "[\"config\", \"get-contexts\", \"-o\", \"name\"],"
+   }
+  ],
+  "reason": "The argument list is fixed; no tool input reaches it.",
+  "quotes_verified": 1
+ },
+ {
+  "rule": "ARG-INJECTION",
+  "severity": "info",
+  "file": "src/tools/kubectl-context.ts",
+  "line": 303,
+  "quote": "result = execFileSync(command, setArgs, {",
+  "message": "Tool input reaches a dangerous call: a program is started with arguments taken from tool input.",
+  "confidence": "medium",
+  "owasp": "ASI02 Tool Misuse and Exploitation",
+  "fix": "None needed.",
+  "source_line": 205,
+  "source_quote": "server.setRequestHandler(",
+  "source_file": "src/index.ts",
+  "id": "F015",
+  "verdict": "false_positive",
+  "evidence": [
+   {
+    "file": "src/tools/kubectl-context.ts",
+    "line": 290,
+    "quote": "!availableContexts.includes(contextName) &&"
+   },
+   {
+    "file": "src/tools/kubectl-context.ts",
+    "line": 300,
+    "quote": "const setArgs = [\"config\", \"use-context\", contextName];"
+   }
+  ],
+  "reason": "contextName must exactly match a context already listed by 'kubectl config get-contexts', so an injected flag value is rejected before use-context runs.",
+  "quotes_verified": 2
+ },
+ {
+  "rule": "ARG-INJECTION",
+  "severity": "critical",
+  "file": "src/tools/kubectl-generic.ts",
+  "line": 129,
+  "quote": "const result = execFileSync(command, cmdArgs, {",
+  "message": "Tool input reaches a dangerous call: a program is started with arguments taken from tool input.",
+  "confidence": "medium",
+  "owasp": "ASI02 Tool Misuse and Exploitation",
+  "fix": "Remove kubectl_generic or restrict it to an allowlist of subcommands and flags (no cp, proxy, plugin, --kubeconfig, --server, --token, --as), and require human approval.",
+  "source_line": 205,
+  "source_quote": "server.setRequestHandler(",
+  "source_file": "src/index.ts",
+  "id": "F018",
+  "verdict": "confirmed",
+  "evidence": [
+   {
+    "file": "src/index.ts",
+    "line": 212,
+    "quote": "const { name, arguments: input = {} } = request.params;"
+   },
+   {
+    "file": "src/tools/kubectl-generic.ts",
+    "line": 76,
+    "quote": "const cmdArgs: string[] = [input.command];"
+   },
+   {
+    "file": "src/tools/kubectl-generic.ts",
+    "line": 118,
+    "quote": "cmdArgs.push(...input.args);"
+   }
+  ],
+  "reason": "kubectl_generic runs any kubectl subcommand with any flags from the tool call: e.g. 'cp <pod>:/x <host path>' writes arbitrary files on the server host, '--kubeconfig=<file>' loads an exec credential plugin (host command execution), and 'get secrets -o yaml' returns unmasked secrets. One injected prompt gets full control of the cluster and the host.",
+  "quotes_verified": 3
+ },
+ {
+  "rule": "ARG-INJECTION",
+  "severity": "info",
+  "file": "src/tools/kubectl-logs.ts",
+  "line": 158,
+  "quote": "const jobs = execFileSync(command, jobsArgs, {",
+  "message": "Tool input reaches a dangerous call: a program is started with arguments taken from tool input.",
+  "confidence": "medium",
+  "owasp": "ASI02 Tool Misuse and Exploitation",
+  "fix": "None needed for argument injection.",
+  "source_line": 205,
+  "source_quote": "server.setRequestHandler(",
+  "source_file": "src/index.ts",
+  "id": "F019",
+  "verdict": "false_positive",
+  "evidence": [
+   {
+    "file": "src/tools/kubectl-logs.ts",
+    "line": 153,
+    "quote": "\"--selector=job-name=\" + name,"
+   }
+  ],
+  "reason": "The tool value is glued to the flag with '=', and namespace follows '-n' as its value, so neither can become a separate kubectl flag.",
+  "quotes_verified": 1
+ },
+ {
+  "rule": "ARG-INJECTION",
+  "severity": "info",
+  "file": "src/tools/kubectl-logs.ts",
+  "line": 328,
+  "quote": "const pods = execFileSync(command, podsArgs, {",
+  "message": "Tool input reaches a dangerous call: a program is started with arguments taken from tool input.",
+  "confidence": "medium",
+  "owasp": "ASI02 Tool Misuse and Exploitation",
+  "fix": "None needed for argument injection.",
+  "source_line": 205,
+  "source_quote": "server.setRequestHandler(",
+  "source_file": "src/index.ts",
+  "id": "F020",
+  "verdict": "false_positive",
+  "evidence": [
+   {
+    "file": "src/tools/kubectl-logs.ts",
+    "line": 324,
+    "quote": "`--selector=${labelSelector}`,"
+   }
+  ],
+  "reason": "The tool value is glued to the flag with '=', and namespace follows '-n' as its value, so neither can become a separate kubectl flag.",
+  "quotes_verified": 1
+ },
+ {
+  "rule": "ARG-INJECTION",
+  "severity": "info",
+  "file": "src/tools/kubectl-logs.ts",
+  "line": 371,
+  "quote": "const logs = execFileSync(command, podArgs, {",
+  "message": "Tool input reaches a dangerous call: a program is started with arguments taken from tool input.",
+  "confidence": "medium",
+  "owasp": "ASI02 Tool Misuse and Exploitation",
+  "fix": "None needed.",
+  "source_line": 205,
+  "source_quote": "server.setRequestHandler(",
+  "source_file": "src/index.ts",
+  "id": "F021",
+  "verdict": "false_positive",
+  "evidence": [
+   {
+    "file": "src/tools/kubectl-logs.ts",
+    "line": 360,
+    "quote": "let podArgs = [\"-n\", namespace, \"logs\", pod];"
+   }
+  ],
+  "reason": "Pod names here come from the cluster's own 'get pods' output, container follows '-c' as its value and the other log options are joined with '='; no tool string becomes a new flag.",
+  "quotes_verified": 1
+ },
+ {
+  "rule": "AUTHZ",
+  "title": "Read-only / non-destructive / allowlist modes only hide tools; tools/call still runs every tool",
+  "verdict": "confirmed",
+  "severity": "high",
+  "evidence": [
+   {
+    "file": "src/index.ts",
+    "line": 193,
+    "quote": "tools = readonlyTools;"
+   },
+   {
+    "file": "src/index.ts",
+    "line": 368,
+    "quote": "if (name === \"kubectl_generic\") {"
+   }
+  ],
+  "reason": "ALLOW_ONLY_READONLY_TOOLS, ALLOW_ONLY_NON_DESTRUCTIVE_TOOLS and ALLOWED_TOOLS filter only tools/list; the tools/call handler dispatches any tool name, so a client or injected prompt that calls kubectl_delete, exec_in_pod or kubectl_generic by name runs it anyway.",
+  "fix": "In the CallTool handler, compute the same allowed set and throw McpError(InvalidRequest) when name is not in it.",
+  "id": "M001",
+  "quotes_verified": 2
+ },
+ {
+  "rule": "ARG-INJECTION",
+  "title": "port_forward builds a command string and splits it on spaces",
+  "verdict": "confirmed",
+  "severity": "high",
+  "evidence": [
+   {
+    "file": "src/tools/port_forward.ts",
+    "line": 87,
+    "quote": "command += ` -n ${input.namespace}`;"
+   },
+   {
+    "file": "src/tools/port_forward.ts",
+    "line": 10,
+    "quote": "const [cmd, ...args] = command.split(\" \");"
+   }
+  ],
+  "reason": "namespace/resourceType/resourceName containing spaces become extra kubectl arguments, e.g. namespace 'default --address 0.0.0.0' exposes the forwarded internal service on all interfaces, or '--kubeconfig /path' switches credentials.",
+  "fix": "Build an argument array: spawn('kubectl', ['port-forward', '-n', ns, `${type}/${name}`, `${local}:${target}`]) after validating names against a DNS-1123 regex and ports as integers.",
+  "id": "M002",
+  "quotes_verified": 2
+ },
+ {
+  "rule": "ARG-INJECTION",
+  "title": "Helm install/upgrade pass release name and chart as positional args; valuesFile reads any host file",
+  "verdict": "confirmed",
+  "severity": "high",
+  "evidence": [
+   {
+    "file": "src/tools/helm-operations.ts",
+    "line": 320,
+    "quote": "params.name,"
+   },
+   {
+    "file": "src/tools/helm-operations.ts",
+    "line": 321,
+    "quote": "params.chart,"
+   },
+   {
+    "file": "src/tools/helm-operations.ts",
+    "line": 210,
+    "quote": "valuesContent = executeCommand(\"cat\", [params.valuesFile]);"
+   }
+  ],
+  "reason": "name/chart starting with '-' are parsed by helm as flags (helm has options such as --post-renderer that run a local program), chart/repo can point at any attacker repository, and valuesFile makes the server 'cat' any host file into chart values that are then rendered into the cluster.",
+  "fix": "Validate name against ^[a-z0-9]([-a-z0-9]*[a-z0-9])?$, reject chart/repo values starting with '-', allowlist repositories, and drop valuesFile or confine it to a fixed directory with realpath + containment check.",
+  "id": "M003",
+  "quotes_verified": 3
+ },
+ {
+  "rule": "SECRET-EXPOSURE",
+  "title": "Secret masking in kubectl_get is bypassed with another resource spelling",
+  "verdict": "confirmed",
+  "severity": "high",
+  "evidence": [
+   {
+    "file": "src/tools/kubectl-get.ts",
+    "line": 167,
+    "quote": "(resourceType === \"secrets\" || resourceType === \"secret\");"
+   },
+   {
+    "file": "src/tools/kubectl-get.ts",
+    "line": 90,
+    "quote": "const args = [\"get\", resourceType];"
+   }
+  ],
+  "reason": "Masking is applied only when resourceType is exactly 'secrets' or 'secret'; resourceType 'pods,secrets' (or 'secrets.v1.') makes kubectl return the secret data unmasked to the model, even in read-only mode.",
+  "fix": "Mask any output whose items have kind == 'Secret' (parse the JSON/YAML) instead of checking the requested type string, and also strip the last-applied-configuration annotation.",
+  "id": "M004",
+  "quotes_verified": 2
+ },
+ {
+  "rule": "NETWORK-EXPOSURE",
+  "title": "HTTP/SSE transports have no authentication by default; Helm chart binds 0.0.0.0 without setting a token",
+  "verdict": "confirmed",
+  "severity": "high",
+  "evidence": [
+   {
+    "file": "src/utils/auth.ts",
+    "line": 34,
+    "quote": "if (!authToken) {"
+   },
+   {
+    "file": "helm-chart/templates/deployment.yaml",
+    "line": 114,
+    "quote": "value: \"0.0.0.0\""
+   },
+   {
+    "file": "src/utils/streamable-http.ts",
+    "line": 23,
+    "quote": "process.env.DNS_REBINDING_PROTECTION === \"true\";"
+   }
+  ],
+  "reason": "Without MCP_AUTH_TOKEN every request is allowed, the Helm chart listens on all interfaces and never sets a token, and DNS-rebinding protection is off by default, so anyone who can reach the port (or a web page via DNS rebinding on localhost) can call kubectl_generic/exec_in_pod with the server's cluster credentials.",
+  "fix": "Refuse to start the HTTP/SSE transports unless MCP_AUTH_TOKEN is set, wire the token into the Helm chart from a Secret, and enable DNS-rebinding protection by default.",
+  "id": "M005",
+  "quotes_verified": 3
+ },
+ {
+  "rule": "SSRF",
+  "title": "filename / patchFile accept any host path or URL",
+  "verdict": "confirmed",
+  "severity": "medium",
+  "evidence": [
+   {
+    "file": "src/index.ts",
+    "line": 212,
+    "quote": "const { name, arguments: input = {} } = request.params;"
+   },
+   {
+    "file": "src/tools/kubectl-apply.ts",
+    "line": 78,
+    "quote": "args.push(\"-f\", input.filename);"
+   },
+   {
+    "file": "src/tools/kubectl-patch.ts",
+    "line": 116,
+    "quote": "args.push(\"--patch-file\", input.patchFile);"
+   }
+  ],
+  "reason": "kubectl -f accepts local paths and http(s) URLs, so the server can be made to read any local manifest/file it can access or fetch a URL from its network (internal services) and apply the result to the cluster.",
+  "fix": "Drop filename/patchFile (use manifest/patchData), or allow only paths under a configured directory after realpath + containment check and reject URLs.",
+  "id": "M006",
+  "quotes_verified": 3
+ },
+ {
+  "rule": "NO-APPROVAL",
+  "title": "Destructive and code-running tools run without confirmation",
+  "verdict": "confirmed",
+  "severity": "medium",
+  "evidence": [
+   {
+    "file": "src/tools/exec_in_pod.ts",
+    "line": 105,
+    "quote": "const args = [\"exec\", input.name, \"-n\", namespace];"
+   },
+   {
+    "file": "src/tools/kubectl-delete.ts",
+    "line": 120,
+    "quote": "args.push(input.resourceType!);"
+   }
+  ],
+  "reason": "exec_in_pod, kubectl_delete, helm install/uninstall and kubectl_generic act on the cluster immediately (only node drain has a confirm flag); combined with M001 there is no human gate at all.",
+  "fix": "Add a confirm/dry-run step for exec, delete, helm and generic commands, and rely on client-side approval for destructiveHint tools.",
+  "id": "M007",
+  "quotes_verified": 2
+ },
+ {
+  "rule": "INDIRECT-INJECTION",
+  "title": "Pod logs, events and exec output returned raw to the model",
+  "verdict": "confirmed",
+  "severity": "low",
+  "evidence": [
+   {
+    "file": "src/tools/exec_in_pod.ts",
+    "line": 130,
+    "quote": "text: result,"
+   }
+  ],
+  "reason": "Logs, events and command output contain text written by workloads or users of the cluster and go straight into the model context, which is how injected instructions can reach the agent and drive the tools above.",
+  "fix": "Wrap tool output in clearly marked untrusted-data blocks and keep the tools above behind approval.",
+  "id": "M008",
+  "quotes_verified": 1
+ }
+]

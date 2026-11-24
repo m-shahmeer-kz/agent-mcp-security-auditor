@@ -1,0 +1,183 @@
+[
+ {
+  "rule": "ARG-INJECTION",
+  "severity": "low",
+  "file": "src/mobilecli.ts",
+  "line": 41,
+  "quote": "return execFileSync(path, args, { encoding: \"utf8\" }).toString().trim();",
+  "message": "Tool input reaches a dangerous call: a program is started with arguments taken from tool input.",
+  "confidence": "high",
+  "owasp": "ASI02 Tool Misuse and Exploitation",
+  "fix": "Call validatePackageName/validateLocale in MobileDevice like AndroidRobot/IosRobot, reject values starting with '-', and put '--' before positional values if mobilecli supports it.",
+  "source_line": 39,
+  "source_quote": "public executeCommand(args: string[]): string {",
+  "id": "F001",
+  "verdict": "needs_context",
+  "evidence": [
+   {
+    "file": "src/mobile-device.ts",
+    "line": 153,
+    "quote": "const args = [\"apps\", \"launch\", packageName];"
+   },
+   {
+    "file": "src/mobilecli.ts",
+    "line": 41,
+    "quote": "return execFileSync(path, args, { encoding: \"utf8\" }).toString().trim();"
+   }
+  ],
+  "reason": "No shell is used (execFileSync with an argument list), so there is no command injection. But on the mobilecli path (iOS simulators) packageName, bundle_id, url, text and install path are passed as positional argv without validatePackageName (which the Android/iOS robots do use) and without '--', so a value starting with '-' is parsed as a mobilecli flag. Whether any mobilecli flag is dangerous cannot be seen from this repo.",
+  "quotes_verified": 2
+ },
+ {
+  "rule": "ARG-INJECTION",
+  "severity": "info",
+  "file": "src/mobilecli.ts",
+  "line": 53,
+  "quote": "return execFileSync(path, args, {",
+  "message": "Tool input reaches a dangerous call: a program is started with arguments taken from tool input.",
+  "confidence": "high",
+  "owasp": "ASI02 Tool Misuse and Exploitation",
+  "fix": "None needed.",
+  "source_line": 51,
+  "source_quote": "public executeCommandBuffer(args: string[]): Buffer {",
+  "id": "F002",
+  "verdict": "false_positive",
+  "evidence": [
+   {
+    "file": "src/mobile-device.ts",
+    "line": 140,
+    "quote": "const fullArgs = [\"screenshot\", \"--device\", this.deviceId, \"--format\", \"png\", \"--output\", \"-\"];"
+   },
+   {
+    "file": "src/server.ts",
+    "line": 189,
+    "quote": "if (device.id === deviceId) {"
+   }
+  ],
+  "reason": "executeCommandBuffer's only caller passes constant arguments plus a deviceId that getRobotFromDevice has already matched against the real device list; no shell is involved.",
+  "quotes_verified": 2
+ },
+ {
+  "rule": "PATH-TRAVERSAL",
+  "severity": "info",
+  "file": "src/logger.ts",
+  "line": 9,
+  "quote": "appendFileSync(logfile, logMessage + \"\\n\");",
+  "message": "Tool input reaches a dangerous call: a file is written / deleted / moved at a path taken from tool input.",
+  "confidence": "medium",
+  "owasp": "ASI02 Tool Misuse and Exploitation",
+  "fix": "None needed (see M003 for what is logged).",
+  "source_line": 72,
+  "source_quote": "server.registerTool(name, {",
+  "source_file": "src/server.ts",
+  "id": "F003",
+  "verdict": "false_positive",
+  "evidence": [
+   {
+    "file": "src/logger.ts",
+    "line": 5,
+    "quote": "const logfile = process.env.LOG_FILE;"
+   }
+  ],
+  "reason": "The log file path comes from the operator's LOG_FILE environment variable, not from tool arguments; only the log message contains tool input.",
+  "quotes_verified": 1
+ },
+ {
+  "rule": "NETWORK-EXPOSURE",
+  "title": "--port SSE server has no authentication, no Origin/Host check and listens on all interfaces",
+  "verdict": "confirmed",
+  "severity": "high",
+  "evidence": [
+   {
+    "file": "src/index.ts",
+    "line": 21,
+    "quote": "app.get(\"/mcp\", (req, res) => {"
+   },
+   {
+    "file": "src/index.ts",
+    "line": 15,
+    "quote": "app.post(\"/mcp\", (req, res) => {"
+   },
+   {
+    "file": "src/index.ts",
+    "line": 30,
+    "quote": "app.listen(port, () => {"
+   }
+  ],
+  "reason": "In --port mode anyone on the network (or a web page via DNS rebinding) can open /mcp and call every tool without credentials: take screenshots and read screen elements of connected phones, type text, open URLs, install/uninstall apps, and write files on the host; a new GET also silently replaces the legitimate client's session.",
+  "fix": "Listen on 127.0.0.1 by default (app.listen(port, '127.0.0.1')), validate Host and Origin headers, require a bearer token, and keep one transport per session instead of a single global one.",
+  "id": "M001",
+  "quotes_verified": 3
+ },
+ {
+  "rule": "INDIRECT-INJECTION",
+  "title": "On-screen text from the device goes straight to the model, which also has device-control tools",
+  "verdict": "confirmed",
+  "severity": "medium",
+  "evidence": [
+   {
+    "file": "src/server.ts",
+    "line": 496,
+    "quote": "return `Found these elements on screen: ${JSON.stringify(result)}`;"
+   },
+   {
+    "file": "src/server.ts",
+    "line": 527,
+    "quote": "await robot.openUrl(url);"
+   },
+   {
+    "file": "src/server.ts",
+    "line": 572,
+    "quote": "await robot.sendKeys(text);"
+   }
+  ],
+  "reason": "Text shown on the device (web pages, messages, emails) is returned unmarked, and the same agent can read private app content and send it out by typing into apps or opening URLs; the server has no approval step of its own, so this toxic combination relies entirely on the MCP client's confirmation prompts.",
+  "fix": "Mark screen-derived text as untrusted data in the result, and document that clients must require human approval for the destructive tools (open_url, type_keys, install/uninstall, launch_app); consider an allowlist of URL schemes/hosts for mobile_open_url.",
+  "id": "M002",
+  "quotes_verified": 3
+ },
+ {
+  "rule": "SECRET-IN-LOGS",
+  "title": "All tool arguments, including typed text, are written to the log",
+  "verdict": "confirmed",
+  "severity": "low",
+  "evidence": [
+   {
+    "file": "src/server.ts",
+    "line": 79,
+    "quote": "trace(`Invoking ${name} with args: ${JSON.stringify(args)}`);"
+   },
+   {
+    "file": "src/logger.ts",
+    "line": 9,
+    "quote": "appendFileSync(logfile, logMessage + \"\\n\");"
+   }
+  ],
+  "reason": "When the agent types a password or OTP with mobile_type_keys, the plain value is written to stderr and to LOG_FILE (and echoed back in the 'Typed text' result).",
+  "fix": "Redact the text argument of mobile_type_keys (and similar) before logging, e.g. log only its length.",
+  "id": "M003",
+  "quotes_verified": 2
+ },
+ {
+  "rule": "PATH-TRAVERSAL",
+  "title": "Screenshot/recording output may be written anywhere if the server's working directory is broad",
+  "verdict": "needs_context",
+  "severity": "low",
+  "evidence": [
+   {
+    "file": "src/utils.ts",
+    "line": 21,
+    "quote": "process.cwd(),"
+   },
+   {
+    "file": "src/server.ts",
+    "line": 598,
+    "quote": "fs.writeFileSync(saveTo, screenshot);"
+   }
+  ],
+  "reason": "validateOutputPath correctly resolves the parent directory and checks containment, but process.cwd() is an allowed root; if the client starts the server with cwd set to '/' or the home folder, saveTo can overwrite any .png/.jpg/.jpeg/.mp4 file there. Content is screenshot bytes, so impact is limited to overwriting media files. Check which cwd your MCP client uses.",
+  "fix": "Use a dedicated output directory (configurable, defaulting to os.tmpdir()/mobile-mcp) instead of process.cwd(), and open the file with O_NOFOLLOW / 'wx' so a planted symlink at the final name is not followed.",
+  "id": "M004",
+  "quotes_verified": 2
+ }
+]

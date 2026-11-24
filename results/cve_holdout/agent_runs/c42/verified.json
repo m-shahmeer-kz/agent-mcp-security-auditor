@@ -1,0 +1,130 @@
+[
+ {
+  "rule": "AUTO-APPROVE",
+  "severity": "high",
+  "file": ".claude/settings.json",
+  "line": 12,
+  "quote": "\"Bash(npx claude-flow *)\",",
+  "message": "Allow rule `Bash(npx claude-flow *)` lets the agent run shell commands without asking.",
+  "confidence": "high",
+  "owasp": "ASI09 Human-Agent Trust Exploitation",
+  "fix": "Remove the wildcard; allow only the specific read-only subcommands you need, pin the package (claude-flow@<exact version>) and install it locally instead of via npx.",
+  "evidence": [
+   {
+    "file": ".claude/settings.json",
+    "line": 12,
+    "quote": "\"Bash(npx claude-flow *)\","
+   },
+   {
+    "file": ".claude/settings.json",
+    "line": 34,
+    "quote": "\"Bash(rm -rf /)\","
+   }
+  ],
+  "id": "F001",
+  "verdict": "confirmed",
+  "reason": "Claude Code may run any claude-flow subcommand with any arguments without asking, and npx fetches whatever version of the package npm currently serves; a prompt-injected agent gets unattended command execution through it. The deny list is a short blocklist of exact strings and stops nothing else.",
+  "quotes_verified": 2
+ },
+ {
+  "rule": "AUTO-APPROVE",
+  "severity": "high",
+  "file": ".claude/settings.json",
+  "line": 28,
+  "quote": "\"Bash(node *)\",",
+  "message": "Allow rule `Bash(node *)` lets the agent run shell commands without asking.",
+  "confidence": "high",
+  "owasp": "ASI09 Human-Agent Trust Exploitation",
+  "fix": "Drop `Bash(node *)`; allow only specific scripts (e.g. `Bash(node scripts/build.js)`) or use npm run targets.",
+  "evidence": [
+   {
+    "file": ".claude/settings.json",
+    "line": 28,
+    "quote": "\"Bash(node *)\","
+   },
+   {
+    "file": ".claude/settings.json",
+    "line": 37,
+    "quote": "\"Bash(eval *)\""
+   }
+  ],
+  "id": "F002",
+  "verdict": "confirmed",
+  "reason": "`node *` auto-approves `node -e \"require('child_process').execSync(...)\"`, i.e. arbitrary code on the developer machine with no prompt; denying `eval *` and `curl * | bash` does not cover it.",
+  "quotes_verified": 2
+ },
+ {
+  "rule": "HIDDEN-INSTRUCTIONS",
+  "severity": "info",
+  "file": ".claude/agents/swarm/hierarchical-coordinator.md",
+  "line": 150,
+  "quote": "// 1️⃣ IMMEDIATELY write initial status",
+  "message": "Agent instruction file contains text that tries to steer the AI in a hidden or unusual way: hidden-characters: '5 invisible character(s): variation-selector'",
+  "confidence": "medium",
+  "owasp": "ASI01 Agent Goal Hijack",
+  "fix": "Remove or rewrite the instruction; strip invisible characters; review who can edit this file.",
+  "signals": [
+   "hidden-characters"
+  ],
+  "id": "F003",
+  "verdict": "false_positive",
+  "evidence": [
+   {
+    "file": ".claude/agents/swarm/hierarchical-coordinator.md",
+    "line": 150,
+    "quote": "IMMEDIATELY write initial status"
+   }
+  ],
+  "reason": "The 'invisible characters' are the variation selector and combining keycap of the emoji 1️⃣ (and similar numbered emoji) used as list markers; no hidden text is encoded.",
+  "quotes_verified": 1
+ },
+ {
+  "rule": "UNPINNED-PACKAGE",
+  "title": "Hooks run unpinned `npx claude-flow@alpha` automatically on every Bash call, edit and session end",
+  "verdict": "confirmed",
+  "severity": "medium",
+  "evidence": [
+   {
+    "file": ".claude/settings.json",
+    "line": 47,
+    "quote": "npx claude-flow@alpha hooks pre-command --command '{}' --validate-safety true --prepare-resources true"
+   },
+   {
+    "file": ".claude/settings.json",
+    "line": 106,
+    "quote": "\"command\": \"npx claude-flow@alpha hooks session-end --generate-summary true --persist-state true --export-metrics true\""
+   },
+   {
+    "file": ".claude/settings.json",
+    "line": 7,
+    "quote": "\"CLAUDE_FLOW_REMOTE_EXECUTION\": \"true\","
+   }
+  ],
+  "reason": "Every tool use downloads and runs the current `alpha` tag of a third-party npm package in the developer's shell (with their credentials), passing it each command and file path; a compromised or changed release runs automatically with no approval. Telemetry and remote execution are also switched on.",
+  "fix": "Pin an exact version and install it as a devDependency (run from node_modules/.bin), review its telemetry, and set CLAUDE_FLOW_REMOTE_EXECUTION/TELEMETRY to false unless needed.",
+  "id": "M001",
+  "quotes_verified": 3
+ },
+ {
+  "rule": "AUTO-APPROVE",
+  "title": "git push and git config * are auto-approved",
+  "verdict": "confirmed",
+  "severity": "medium",
+  "evidence": [
+   {
+    "file": ".claude/settings.json",
+    "line": 21,
+    "quote": "\"Bash(git push)\","
+   },
+   {
+    "file": ".claude/settings.json",
+    "line": 22,
+    "quote": "\"Bash(git config *)\","
+   }
+  ],
+  "reason": "An injected agent can commit and push to the remote without asking (a way to send data out), and `git config` can set core.hooksPath, core.sshCommand or aliases that execute arbitrary commands on the next git call.",
+  "fix": "Remove git push and git config from the allow list (keep them on ask), or restrict git config to read-only forms such as `git config --get *`.",
+  "id": "M002",
+  "quotes_verified": 2
+ }
+]

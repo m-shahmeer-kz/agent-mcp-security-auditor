@@ -1,0 +1,239 @@
+[
+ {
+  "rule": "TOOL-POISONING",
+  "severity": "info",
+  "file": "src/mcp/tools-n8n-manager.ts",
+  "line": 658,
+  "quote": "name: 'n8n_manage_credentials',",
+  "message": "Tool 'n8n_manage_credentials' has a description with hidden or manipulative instructions for the AI (score 35/100): sensitive-target: 'credentials'",
+  "confidence": "medium",
+  "owasp": "ASI01 Agent Goal Hijack / ASI04 Agentic Supply Chain",
+  "fix": "None for the description (see M004 for its annotation).",
+  "tool": "n8n_manage_credentials",
+  "signals": [
+   "sensitive-target"
+  ],
+  "id": "F001",
+  "verdict": "false_positive",
+  "evidence": [
+   {
+    "file": "src/mcp/tools-n8n-manager.ts",
+    "line": 659,
+    "quote": "description: 'Manage n8n credentials. Actions: list, get, create, update, delete, getSchema. Use getSchema to discover required fields before creating."
+   }
+  ],
+  "reason": "Ordinary usage guidance: the word 'credentials' is the tool's subject (managing n8n credentials), and 'use getSchema first' serves the user's own request. No hidden steering, no data sent elsewhere.",
+  "quotes_verified": 1
+ },
+ {
+  "rule": "NETWORK-EXPOSURE",
+  "severity": "info",
+  "file": "src/http-server-single-session.ts",
+  "line": 955,
+  "quote": "const host = process.env.HOST || '0.0.0.0';",
+  "message": "The server listens on all network interfaces (0.0.0.0).",
+  "confidence": "medium",
+  "owasp": "ASI03 Identity and Privilege Abuse",
+  "fix": "None needed.",
+  "id": "F002",
+  "verdict": "false_positive",
+  "evidence": [
+   {
+    "file": "src/http-server-single-session.ts",
+    "line": 956,
+    "quote": "const baseUrl = detectBaseUrl(req, host, port);"
+   }
+  ],
+  "reason": "This 0.0.0.0 default is only used to build the base URL shown by the unauthenticated info endpoint; it does not bind a socket.",
+  "quotes_verified": 1
+ },
+ {
+  "rule": "NETWORK-EXPOSURE",
+  "severity": "low",
+  "file": "src/http-server-single-session.ts",
+  "line": 1474,
+  "quote": "const host = process.env.HOST || '0.0.0.0';",
+  "message": "The server listens on all network interfaces (0.0.0.0).",
+  "confidence": "medium",
+  "owasp": "ASI03 Identity and Privilege Abuse",
+  "fix": "Optionally default HOST to 127.0.0.1 outside Docker.",
+  "id": "F003",
+  "verdict": "false_positive",
+  "evidence": [
+   {
+    "file": "src/http-server-single-session.ts",
+    "line": 1476,
+    "quote": "this.expressServer = app.listen(port, host, () => {"
+   },
+   {
+    "file": "src/http-server-single-session.ts",
+    "line": 1373,
+    "quote": "if (!this.authenticateRequest(req, res)) return;"
+   }
+  ],
+  "reason": "Binding all interfaces is intended for container deployment; the MCP endpoints require a Bearer AUTH_TOKEN compared in constant time, the server refuses to start without a token and refuses the default token in production. Remaining gaps on GET/DELETE /mcp are covered in M003.",
+  "quotes_verified": 2
+ },
+ {
+  "rule": "NETWORK-EXPOSURE",
+  "severity": "info",
+  "file": "src/http-server.ts",
+  "line": 201,
+  "quote": "const host = process.env.HOST || '0.0.0.0';",
+  "message": "The server listens on all network interfaces (0.0.0.0).",
+  "confidence": "medium",
+  "owasp": "ASI03 Identity and Privilege Abuse",
+  "fix": "None needed.",
+  "id": "F004",
+  "verdict": "false_positive",
+  "evidence": [
+   {
+    "file": "src/http-server.ts",
+    "line": 202,
+    "quote": "const baseUrl = detectBaseUrl(req, host, port);"
+   }
+  ],
+  "reason": "Same as F002: only used to display the base URL in the info response.",
+  "quotes_verified": 1
+ },
+ {
+  "rule": "NETWORK-EXPOSURE",
+  "severity": "low",
+  "file": "src/http-server.ts",
+  "line": 565,
+  "quote": "const host = process.env.HOST || '0.0.0.0';",
+  "message": "The server listens on all network interfaces (0.0.0.0).",
+  "confidence": "medium",
+  "owasp": "ASI03 Identity and Privilege Abuse",
+  "fix": "Refuse to start with the default AUTH_TOKEN in http-server.ts as the single-session server does.",
+  "id": "F005",
+  "verdict": "false_positive",
+  "evidence": [
+   {
+    "file": "src/http-server.ts",
+    "line": 567,
+    "quote": "expressServer = app.listen(port, host, () => {"
+   },
+   {
+    "file": "src/http-server.ts",
+    "line": 344,
+    "quote": "const isValidToken = authToken &&"
+   }
+  ],
+  "reason": "POST /mcp in the legacy server requires a Bearer token checked with a timing-safe compare; the bind address alone is not an exposure. Note this legacy server only warns (does not refuse) when the default AUTH_TOKEN is used.",
+  "quotes_verified": 2
+ },
+ {
+  "rule": "SECRET-IN-LOGS",
+  "title": "POST /mcp logs every request's headers and full body at INFO, before authentication",
+  "verdict": "confirmed",
+  "severity": "medium",
+  "evidence": [
+   {
+    "file": "src/http-server-single-session.ts",
+    "line": 1326,
+    "quote": "logger.info('POST /mcp request received - DETAILED DEBUG', {"
+   },
+   {
+    "file": "src/http-server-single-session.ts",
+    "line": 1327,
+    "quote": "headers: req.headers,"
+   },
+   {
+    "file": "src/http-server-single-session.ts",
+    "line": 1332,
+    "quote": "bodyContent: req.body ? JSON.stringify(req.body, null, 2) : 'undefined',"
+   }
+  ],
+  "reason": "At the default LOG_LEVEL=info every request writes the Authorization bearer token, the x-n8n-key tenant API key, the mcp-session-id and the full JSON-RPC body (including credential data sent to n8n_manage_credentials create/update) to stdout/container logs, so anyone with log access gets the server token and tenants' n8n API keys.",
+  "fix": "Drop the header/body dump or log only a redacted allowlist (method, path, content-length); never log Authorization, x-n8n-key or tools/call arguments. Do the same for the POST /mcp/test handler (line 1027).",
+  "id": "M001",
+  "quotes_verified": 3
+ },
+ {
+  "rule": "SSRF",
+  "title": "Per-request x-n8n-url is checked once but redirects and later DNS answers are not",
+  "verdict": "confirmed",
+  "severity": "medium",
+  "evidence": [
+   {
+    "file": "src/http-server-single-session.ts",
+    "line": 1390,
+    "quote": "n8nApiUrl: hasUrl || undefined,"
+   },
+   {
+    "file": "src/http-server-single-session.ts",
+    "line": 537,
+    "quote": "const ssrfResult = await SSRFProtection.validateWebhookUrl(instanceContext.n8nApiUrl);"
+   },
+   {
+    "file": "src/utils/ssrf-protection.ts",
+    "line": 103,
+    "quote": "const { address } = await lookup(hostname);"
+   },
+   {
+    "file": "src/services/n8n-api-client.ts",
+    "line": 84,
+    "quote": "this.client = axios.create({"
+   }
+  ],
+  "reason": "An authenticated caller sets x-n8n-url; the check resolves DNS once, but the axios client re-resolves on every call (DNS rebinding) and follows redirects by default, so a host that passes the check and then 302-redirects (or re-resolves) to 169.254.169.254 or an internal service is reached with the n8n API client, and responses come back to the caller. The IPv6 check also only matches the literal prefixes fc00:/fd00: (other fc00::/7 addresses pass).",
+  "fix": "Pin the validated IP for the connection (custom lookup/http agent), set maxRedirects: 0 on the n8n API and webhook axios clients (or re-validate each hop), and test IPv6 ranges with a real CIDR check; only accept x-n8n-url when ENABLE_MULTI_TENANT=true.",
+  "id": "M002",
+  "quotes_verified": 4
+ },
+ {
+  "rule": "AUTH",
+  "title": "GET and DELETE /mcp skip the Bearer check and rely on the session ID alone",
+  "verdict": "confirmed",
+  "severity": "low",
+  "evidence": [
+   {
+    "file": "src/http-server-single-session.ts",
+    "line": 1067,
+    "quote": "app.get('/mcp', async (req, res) => {"
+   },
+   {
+    "file": "src/http-server-single-session.ts",
+    "line": 1074,
+    "quote": "await existingTransport.handleRequest(req, res, undefined);"
+   },
+   {
+    "file": "src/http-server-single-session.ts",
+    "line": 1266,
+    "quote": "app.delete('/mcp', async (req: express.Request, res: express.Response): Promise<void> => {"
+   },
+   {
+    "file": "src/http-server-single-session.ts",
+    "line": 1298,
+    "quote": "await this.removeSession(mcpSessionId, 'manual_termination');"
+   }
+  ],
+  "reason": "Anyone who learns a session ID (they are logged, see M001) can attach to that session's server-to-client stream or terminate it without the AUTH_TOKEN. Session IDs are random UUIDs, so this needs a leak first.",
+  "fix": "Call this.authenticateRequest(req, res) at the top of GET /mcp (session branch) and DELETE /mcp.",
+  "id": "M003",
+  "quotes_verified": 4
+ },
+ {
+  "rule": "NO-APPROVAL",
+  "title": "Credential tool that can delete/overwrite secrets is annotated non-destructive",
+  "verdict": "confirmed",
+  "severity": "low",
+  "evidence": [
+   {
+    "file": "src/mcp/tools-n8n-manager.ts",
+    "line": 658,
+    "quote": "name: 'n8n_manage_credentials',"
+   },
+   {
+    "file": "src/mcp/tools-n8n-manager.ts",
+    "line": 674,
+    "quote": "destructiveHint: false,"
+   }
+  ],
+  "reason": "n8n_manage_credentials supports delete and update but declares destructiveHint: false, so clients that auto-approve non-destructive tools will let a prompt-injected agent delete or replace n8n credentials without asking.",
+  "fix": "Set destructiveHint: true (or split delete/update into a separate destructive tool) and require confirmation for credential changes.",
+  "id": "M004",
+  "quotes_verified": 2
+ }
+]

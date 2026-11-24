@@ -1,0 +1,46 @@
+{
+  "medium": {
+    "caught": 635,
+    "poisoned": 793,
+    "recall": 0.8008,
+    "false_alarms": 1,
+    "clean": 198,
+    "false_alarm_rate": 0.0051,
+    "by_paradigm": {
+      "Template-3": [
+        301,
+        374
+      ],
+      "Template-2": [
+        241,
+        294
+      ],
+      "Template-1": [
+        93,
+        125
+      ]
+    }
+  },
+  "low": {
+    "caught": 765,
+    "poisoned": 793,
+    "recall": 0.9647,
+    "false_alarms": 5,
+    "clean": 198,
+    "false_alarm_rate": 0.0253,
+    "by_paradigm": {
+      "Template-3": [
+        356,
+        374
+      ],
+      "Template-2": [
+        292,
+        294
+      ],
+      "Template-1": [
+        117,
+        125
+      ]
+    }
+  }
+}

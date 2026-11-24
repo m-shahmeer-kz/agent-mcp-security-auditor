@@ -1,0 +1,382 @@
+[
+ {
+  "rule": "SECRET-IN-CODE",
+  "severity": "info",
+  "file": "doris_mcp_server/auth/oauth_types.py",
+  "line": 166,
+  "quote": "\"authorization_endpoint\": \"http…th\",",
+  "message": "Hard-coded secret (authorization_endpoint) found in the source (http…th). Anyone with the repository (or a tool that reads files) has it.",
+  "confidence": "high",
+  "owasp": "ASI03 Identity and Privilege Abuse",
+  "fix": "None.",
+  "masked": true,
+  "id": "F001",
+  "verdict": "false_positive",
+  "evidence": [
+   {
+    "file": "doris_mcp_server/auth/oauth_types.py",
+    "line": 166,
+    "quote": "\"authorization_endpoint\": \"https://accounts.google.com/o/oauth2/auth\","
+   }
+  ],
+  "reason": "Public Google OAuth endpoint URL, not a secret.",
+  "quotes_verified": 1
+ },
+ {
+  "rule": "SECRET-IN-CODE",
+  "severity": "info",
+  "file": "doris_mcp_server/auth/oauth_types.py",
+  "line": 167,
+  "quote": "\"token_endpoint\": \"http…en\",",
+  "message": "Hard-coded secret (token_endpoint) found in the source (http…en). Anyone with the repository (or a tool that reads files) has it.",
+  "confidence": "high",
+  "owasp": "ASI03 Identity and Privilege Abuse",
+  "fix": "None.",
+  "masked": true,
+  "id": "F002",
+  "verdict": "false_positive",
+  "evidence": [
+   {
+    "file": "doris_mcp_server/auth/oauth_types.py",
+    "line": 167,
+    "quote": "\"token_endpoint\": \"https://oauth2.googleapis.com/token\","
+   }
+  ],
+  "reason": "Public Google OAuth token endpoint URL, not a secret.",
+  "quotes_verified": 1
+ },
+ {
+  "rule": "SECRET-IN-CODE",
+  "severity": "info",
+  "file": "doris_mcp_server/auth/oauth_types.py",
+  "line": 177,
+  "quote": "\"authorization_endpoint\": \"http…ze\",",
+  "message": "Hard-coded secret (authorization_endpoint) found in the source (http…ze). Anyone with the repository (or a tool that reads files) has it.",
+  "confidence": "high",
+  "owasp": "ASI03 Identity and Privilege Abuse",
+  "fix": "None.",
+  "masked": true,
+  "id": "F003",
+  "verdict": "false_positive",
+  "evidence": [
+   {
+    "file": "doris_mcp_server/auth/oauth_types.py",
+    "line": 177,
+    "quote": "\"authorization_endpoint\": \"https://login.microsoftonline.com/common/oauth2/v2.0/authorize\","
+   }
+  ],
+  "reason": "Public Microsoft identity platform endpoint URL, not a secret.",
+  "quotes_verified": 1
+ },
+ {
+  "rule": "SECRET-IN-CODE",
+  "severity": "info",
+  "file": "doris_mcp_server/auth/oauth_types.py",
+  "line": 178,
+  "quote": "\"token_endpoint\": \"http…en\",",
+  "message": "Hard-coded secret (token_endpoint) found in the source (http…en). Anyone with the repository (or a tool that reads files) has it.",
+  "confidence": "high",
+  "owasp": "ASI03 Identity and Privilege Abuse",
+  "fix": "None.",
+  "masked": true,
+  "id": "F004",
+  "verdict": "false_positive",
+  "evidence": [
+   {
+    "file": "doris_mcp_server/auth/oauth_types.py",
+    "line": 178,
+    "quote": "\"token_endpoint\": \"https://login.microsoftonline.com/common/oauth2/v2.0/token\","
+   }
+  ],
+  "reason": "Public Microsoft token endpoint URL, not a secret.",
+  "quotes_verified": 1
+ },
+ {
+  "rule": "SECRET-IN-CODE",
+  "severity": "info",
+  "file": "test/test_config.json",
+  "line": 41,
+  "quote": "\"valid_token\": \"vali…23\",",
+  "message": "Hard-coded secret (valid_token) found in the source (vali…23). Anyone with the repository (or a tool that reads files) has it.",
+  "confidence": "high",
+  "owasp": "ASI03 Identity and Privilege Abuse",
+  "fix": "None.",
+  "masked": true,
+  "id": "F005",
+  "verdict": "false_positive",
+  "evidence": [
+   {
+    "file": "test/test_config.json",
+    "line": 40,
+    "quote": "\"auth_tokens\": {"
+   }
+  ],
+  "reason": "Placeholder test fixture value in test config (valid_token/admin_token/invalid_token for unit tests), not a real credential.",
+  "quotes_verified": 1
+ },
+ {
+  "rule": "SECRET-IN-CODE",
+  "severity": "info",
+  "file": "test/test_config.json",
+  "line": 42,
+  "quote": "\"admin_token\": \"admi…56\",",
+  "message": "Hard-coded secret (admin_token) found in the source (admi…56). Anyone with the repository (or a tool that reads files) has it.",
+  "confidence": "high",
+  "owasp": "ASI03 Identity and Privilege Abuse",
+  "fix": "None.",
+  "masked": true,
+  "id": "F006",
+  "verdict": "false_positive",
+  "evidence": [
+   {
+    "file": "test/test_config.json",
+    "line": 40,
+    "quote": "\"auth_tokens\": {"
+   }
+  ],
+  "reason": "Placeholder test fixture token, not a real credential.",
+  "quotes_verified": 1
+ },
+ {
+  "rule": "SECRET-IN-CODE",
+  "severity": "info",
+  "file": "test/test_config.json",
+  "line": 43,
+  "quote": "\"invalid_token\": \"inva…89\"",
+  "message": "Hard-coded secret (invalid_token) found in the source (inva…89). Anyone with the repository (or a tool that reads files) has it.",
+  "confidence": "high",
+  "owasp": "ASI03 Identity and Privilege Abuse",
+  "fix": "None.",
+  "masked": true,
+  "id": "F007",
+  "verdict": "false_positive",
+  "evidence": [
+   {
+    "file": "test/test_config.json",
+    "line": 40,
+    "quote": "\"auth_tokens\": {"
+   }
+  ],
+  "reason": "Deliberately invalid test token, not a credential.",
+  "quotes_verified": 1
+ },
+ {
+  "rule": "SECRET-IN-CODE",
+  "severity": "medium",
+  "file": "tokens.json",
+  "line": 8,
+  "quote": "\"token\": \"dori…56\",",
+  "message": "Hard-coded secret (token) found in the source (dori…56). Anyone with the repository (or a tool that reads files) has it.",
+  "confidence": "high",
+  "owasp": "ASI03 Identity and Privilege Abuse",
+  "fix": "Do not ship tokens.json; ship tokens.json.example, refuse to start if a known default token is present, and generate random tokens at setup. Rotate any deployed copy.",
+  "masked": true,
+  "id": "F008",
+  "verdict": "confirmed",
+  "evidence": [
+   {
+    "file": "tokens.json",
+    "line": 7,
+    "quote": "\"token_id\": \"admin-token\","
+   },
+   {
+    "file": "doris_mcp_server/auth/token_manager.py",
+    "line": 160,
+    "quote": "with open(self.token_file_path, 'r') as f:"
+   }
+  ],
+  "reason": "The repo ships a tokens.json with a predictable, publicly known admin token (masked dori…56) that the TokenManager loads by default from the working directory; anyone who enables ENABLE_TOKEN_AUTH without replacing the file accepts a token every reader of the repo knows. It is bound to the Doris root user with an empty password.",
+  "quotes_verified": 2
+ },
+ {
+  "rule": "SECRET-IN-CODE",
+  "severity": "medium",
+  "file": "tokens.json",
+  "line": 24,
+  "quote": "\"token\": \"dori…56\",",
+  "message": "Hard-coded secret (token) found in the source (dori…56). Anyone with the repository (or a tool that reads files) has it.",
+  "confidence": "high",
+  "owasp": "ASI03 Identity and Privilege Abuse",
+  "fix": "Same as F008: remove from repo, generate per deployment, rotate.",
+  "masked": true,
+  "id": "F009",
+  "verdict": "confirmed",
+  "evidence": [
+   {
+    "file": "tokens.json",
+    "line": 23,
+    "quote": "\"token_id\": \"analyst-token\","
+   },
+   {
+    "file": "tokens.json",
+    "line": 31,
+    "quote": "\"user\": \"root\","
+   }
+  ],
+  "reason": "Second well-known default token (masked dori…56) in the shipped tokens.json, also mapped to Doris root.",
+  "quotes_verified": 2
+ },
+ {
+  "rule": "SECRET-IN-CODE",
+  "severity": "medium",
+  "file": "tokens.json",
+  "line": 40,
+  "quote": "\"token\": \"dori…56\",",
+  "message": "Hard-coded secret (token) found in the source (dori…56). Anyone with the repository (or a tool that reads files) has it.",
+  "confidence": "high",
+  "owasp": "ASI03 Identity and Privilege Abuse",
+  "fix": "Remove from repo; bind read-only tokens to a Doris user with only SELECT grants; rotate.",
+  "masked": true,
+  "id": "F010",
+  "verdict": "confirmed",
+  "evidence": [
+   {
+    "file": "tokens.json",
+    "line": 39,
+    "quote": "\"token_id\": \"readonly-token\","
+   },
+   {
+    "file": "tokens.json",
+    "line": 47,
+    "quote": "\"user\": \"root\","
+   }
+  ],
+  "reason": "Third well-known default token (masked dori…56); despite its 'readonly' name it is bound to the Doris root user, so a holder is not read-only at the database level.",
+  "quotes_verified": 2
+ },
+ {
+  "rule": "AUTH-BYPASS",
+  "severity": "low",
+  "file": "doris_mcp_server/auth/jwt_manager.py",
+  "line": 380,
+  "quote": "payload = jwt.decode(token, options={'verify_signature': False})",
+  "message": "A JWT is decoded without checking its signature (or allows alg 'none'), so anyone can forge a token with any claims.",
+  "confidence": "high",
+  "owasp": "",
+  "fix": "Delete decode_token_unsafe/get_token_info or rename and guard them so they cannot be used for authorization.",
+  "id": "F011",
+  "verdict": "false_positive",
+  "evidence": [
+   {
+    "file": "doris_mcp_server/auth/jwt_manager.py",
+    "line": 371,
+    "quote": "\"\"\"Decode token without verifying signature (for debugging only)"
+   },
+   {
+    "file": "doris_mcp_server/auth/jwt_manager.py",
+    "line": 396,
+    "quote": "payload = await self.decode_token_unsafe(token)"
+   }
+  ],
+  "reason": "decode_token_unsafe is only used by get_token_info, which nothing in the code calls; real JWT validation goes through validate_token with jwt_verify_signature defaulting to True. Not an auth bypass today, but a footgun.",
+  "quotes_verified": 2
+ },
+ {
+  "rule": "SQL-INJECTION",
+  "title": "get_sql_profile runs the caller's SQL with the security validator skipped (and on the global high-privilege pool)",
+  "verdict": "confirmed",
+  "severity": "high",
+  "evidence": [
+   {
+    "file": "doris_mcp_server/tools/tools_manager.py",
+    "line": 1565,
+    "quote": "sql = arguments.get(\"sql\")"
+   },
+   {
+    "file": "doris_mcp_server/utils/analysis_tools.py",
+    "line": 557,
+    "quote": "auth_context = get_auth_context()"
+   },
+   {
+    "file": "doris_mcp_server/utils/sql_security_utils.py",
+    "line": 33,
+    "quote": "auth_context_var: ContextVar = ContextVar('mcp_auth_context', default=None)"
+   },
+   {
+    "file": "doris_mcp_server/utils/db.py",
+    "line": 85,
+    "quote": "if self.security_manager and auth_context:"
+   },
+   {
+    "file": "doris_mcp_server/utils/analysis_tools.py",
+    "line": 579,
+    "quote": "sql_result = await connection.execute(sql, auth_context=auth_context)"
+   }
+  ],
+  "reason": "get_auth_context() reads a ContextVar that nothing ever sets (set_auth_context has no callers; main.py sets the different security.mcp_auth_context_var), so auth_context is None and DorisConnection.execute skips validate_sql_security; calling get_sql_profile with sql='DROP TABLE x' (or any INSERT/DELETE/GRANT) and catalog_name='internal' executes it unchecked. The connection also comes from the global pool (get_connection(\"query\")), so token-bound lower-privilege DB users are bypassed.",
+  "fix": "Read mcp_auth_context_var (or delete the duplicate ContextVar), make DorisConnection.execute always validate (build a default AuthContext when none is set instead of skipping), allow only SELECT/WITH in get_sql_profile, and use the per-token pool via execute_query.",
+  "id": "M001",
+  "quotes_verified": 5
+ },
+ {
+  "rule": "DANGEROUS-AGENT-TOOL",
+  "title": "exec_query runs model-written SQL guarded only by a keyword blocklist, as Doris root by default",
+  "verdict": "confirmed",
+  "severity": "high",
+  "evidence": [
+   {
+    "file": "doris_mcp_server/tools/tools_manager.py",
+    "line": 1465,
+    "quote": "sql = arguments.get(\"sql\")"
+   },
+   {
+    "file": "doris_mcp_server/utils/config.py",
+    "line": 126,
+    "quote": "blocked_keywords: list[str] = field("
+   },
+   {
+    "file": "doris_mcp_server/utils/config.py",
+    "line": 44,
+    "quote": "user: str = \"root\""
+   }
+  ],
+  "reason": "Arbitrary SQL from the tool argument is executed after a blocklist (DROP/CREATE/ALTER/.../KILL) and regex checks, which the review guide treats as not a working guard; statements outside the list (e.g. SET GLOBAL, ADMIN SET ... CONFIG, SELECT ... INTO OUTFILE / EXPORT to remote storage) are not blocked, and the default DB user is root.",
+  "fix": "Connect exec_query with a dedicated Doris user that has only SELECT on the intended databases; switch to an allowlist (single SELECT/WITH/SHOW/DESCRIBE statement, parsed) rather than a blocklist; require client approval for this tool.",
+  "id": "M002",
+  "quotes_verified": 3
+ },
+ {
+  "rule": "SECRET-IN-LOGS",
+  "title": "All MCP request headers, including Authorization tokens, are logged at INFO",
+  "verdict": "confirmed",
+  "severity": "medium",
+  "evidence": [
+   {
+    "file": "doris_mcp_server/main.py",
+    "line": 629,
+    "quote": "headers = dict(scope.get(\"headers\", []))"
+   },
+   {
+    "file": "doris_mcp_server/main.py",
+    "line": 631,
+    "quote": "self.logger.info(f\"MCP Request - Headers: {headers}\")"
+   }
+  ],
+  "reason": "Every HTTP MCP request writes its raw headers (Authorization bearer token, cookies) to the log, so anyone with log access can replay any client's token.",
+  "fix": "Remove the header dump or redact authorization/cookie/x-api-key before logging; log at DEBUG at most.",
+  "id": "M003",
+  "quotes_verified": 2
+ },
+ {
+  "rule": "AUTH",
+  "title": "HTTP transport runs with no authentication by default (anonymous context gets full tool access)",
+  "verdict": "needs_context",
+  "severity": "high",
+  "evidence": [
+   {
+    "file": "doris_mcp_server/utils/config.py",
+    "line": 81,
+    "quote": "enable_token_auth: bool = False  # Enable token-based authentication (default: disabled)"
+   },
+   {
+    "file": "doris_mcp_server/utils/security.py",
+    "line": 237,
+    "quote": "# Return anonymous context when no authentication is enabled"
+   }
+  ],
+  "reason": "With all auth switches off (the default), every HTTP caller gets an anonymous context and can use exec_query/get_sql_profile against the configured (root by default) Doris connection. Impact depends on whether HTTP mode is used and which host it binds to (docs show --host 0.0.0.0).",
+  "fix": "Refuse to start the HTTP transport unless an auth method is enabled (or bind to 127.0.0.1 only), and check Origin/Host. User should confirm deployment mode and exposure.",
+  "id": "M004",
+  "quotes_verified": 2
+ }
+]

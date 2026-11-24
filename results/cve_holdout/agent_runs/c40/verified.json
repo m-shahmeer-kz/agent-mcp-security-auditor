@@ -1,0 +1,132 @@
+[
+ {
+  "rule": "SSRF",
+  "title": "Hackmd-Api-Url header lets any HTTP caller point the server (and its env token) at any URL",
+  "verdict": "confirmed",
+  "severity": "critical",
+  "evidence": [
+   {
+    "file": "index.ts",
+    "line": 63,
+    "quote": "config.hackmdApiUrl = hackmdApiUrlHeader;"
+   },
+   {
+    "file": "index.ts",
+    "line": 108,
+    "quote": "rawConfig.hackmdApiToken || process.env.HACKMD_API_TOKEN;"
+   },
+   {
+    "file": "index.ts",
+    "line": 125,
+    "quote": "rawConfig.hackmdApiUrl ||"
+   },
+   {
+    "file": "index.ts",
+    "line": 92,
+    "quote": "const client = new API(config.hackmdApiToken, config.hackmdApiUrl);"
+   }
+  ],
+  "reason": "In TRANSPORT=http mode an unauthenticated request can send only the Hackmd-Api-Url header (or ?config=base64 JSON) with an attacker URL; the server then falls back to the operator's HACKMD_API_TOKEN and sends it as a bearer token to that URL on every tool call (token theft), and can also be aimed at internal hosts or 169.254.169.254 (SSRF). ConfigSchema only checks it is a string.",
+  "fix": "Do not accept the API URL from requests (env/config only), or allowlist https://api.hackmd.io; never combine a request-supplied URL with the server's env token; block private/link-local addresses.",
+  "id": "M001",
+  "quotes_verified": 4
+ },
+ {
+  "rule": "AUTH",
+  "title": "HTTP /mcp endpoint has no authentication and falls back to the operator's token",
+  "verdict": "confirmed",
+  "severity": "high",
+  "evidence": [
+   {
+    "file": "index.ts",
+    "line": 101,
+    "quote": "app.post(\"/mcp\", async (req: Request, res: Response) => {"
+   },
+   {
+    "file": "index.ts",
+    "line": 108,
+    "quote": "rawConfig.hackmdApiToken || process.env.HACKMD_API_TOKEN;"
+   },
+   {
+    "file": "index.ts",
+    "line": 189,
+    "quote": "app.listen(PORT, () => {"
+   }
+  ],
+  "reason": "Any client that reaches the port (listen binds all interfaces) gets read/write/delete access to the HackMD account whose token is in the env, without presenting any credential — a confused deputy with one static upstream credential.",
+  "fix": "In HTTP mode require each caller to send its own token (no env fallback), or add real authentication on /mcp; bind to 127.0.0.1 unless deployed behind an authenticating proxy.",
+  "id": "M002",
+  "quotes_verified": 3
+ },
+ {
+  "rule": "NETWORK-EXPOSURE",
+  "title": "CORS defaults to '*' and allows the token/URL headers",
+  "verdict": "confirmed",
+  "severity": "medium",
+  "evidence": [
+   {
+    "file": "index.ts",
+    "line": 27,
+    "quote": "origin: process.env.CORS_ORIGIN?.split(\",\") || \"*\","
+   },
+   {
+    "file": "index.ts",
+    "line": 36,
+    "quote": "HACKMD_API_TOKEN_HEADER,"
+   }
+  ],
+  "reason": "With no CORS_ORIGIN set, any web page the user visits can send cross-origin POSTs to a local/remote HTTP instance and drive all tools with the env token (and set Hackmd-Api-Url for M001); no Origin/Host check guards against DNS rebinding.",
+  "fix": "Default to no CORS (or an explicit allowlist) and validate Origin/Host headers on /mcp.",
+  "id": "M003",
+  "quotes_verified": 2
+ },
+ {
+  "rule": "TOXIC-FLOW",
+  "title": "Untrusted note content + private notes + a way to publish them, no approval",
+  "verdict": "confirmed",
+  "severity": "medium",
+  "evidence": [
+   {
+    "file": "tools/userNotes.ts",
+    "line": 59,
+    "quote": "text: JSON.stringify(note, null, 2),"
+   },
+   {
+    "file": "tools/userNotes.ts",
+    "line": 112,
+    "quote": "payload: UpdateNoteOptionsSchema.describe(\"Update note options\"),"
+   },
+   {
+    "file": "utils/schemas.ts",
+    "line": 63,
+    "quote": "readPermission: z"
+   }
+  ],
+  "reason": "get_note / list_team_notes return note bodies (often written by teammates or guests) raw into the model; injected text there can make the agent read private notes and then create_note/update_note with readPermission 'guest' to publish them, or delete notes.",
+  "fix": "Mark note content as untrusted data in results, require user confirmation for permission changes, deletes and creates, and consider dropping readPermission/writePermission from the tool schema.",
+  "id": "M004",
+  "quotes_verified": 3
+ },
+ {
+  "rule": "NO-APPROVAL",
+  "title": "delete_note / delete_team_note / update tools act immediately",
+  "verdict": "needs_context",
+  "severity": "low",
+  "evidence": [
+   {
+    "file": "tools/userNotes.ts",
+    "line": 157,
+    "quote": "const result = await client.deleteNote(noteId);"
+   },
+   {
+    "file": "tools/teamNotes.ts",
+    "line": 130,
+    "quote": "const result = await client.deleteTeamNote(teamPath, noteId);"
+   }
+  ],
+  "reason": "Destructive tools have destructiveHint annotations but no server-side confirmation or dry-run; whether a human approves depends on the MCP client's settings.",
+  "fix": "Keep the annotations and make sure clients do not auto-approve these tools; optionally add a confirm parameter / soft-delete.",
+  "id": "M005",
+  "quotes_verified": 2
+ }
+]

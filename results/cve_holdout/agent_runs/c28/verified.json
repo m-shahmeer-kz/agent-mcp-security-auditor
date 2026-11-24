@@ -1,0 +1,102 @@
+[
+ {
+  "rule": "PATH-TRAVERSAL",
+  "severity": "info",
+  "file": "src/mcp/tools/import_tmx.ts",
+  "line": 38,
+  "quote": "fs.writeFileSync(tempFilePath, tmx_content);",
+  "message": "Tool input reaches a dangerous call: a file is written / deleted / moved at a path taken from tool input.",
+  "confidence": "medium",
+  "owasp": "ASI02 Tool Misuse and Exploitation",
+  "fix": "Optional hardening: use fs.mkdtempSync and write with flag 'wx' / mode 0o600.",
+  "source_line": 20,
+  "source_quote": "export async function importTmx(args: any, lara: Translator) {",
+  "id": "F001",
+  "verdict": "false_positive",
+  "evidence": [
+   {
+    "file": "src/mcp/tools/import_tmx.ts",
+    "line": 35,
+    "quote": "const tempFilePath = path.join(tempDir, `tmx-${Date.now()}-${Math.random().toString(36).slice(2)}.tmx`);"
+   },
+   {
+    "file": "src/mcp/tools/import_tmx.ts",
+    "line": 30,
+    "quote": "const tempDir = path.join(os.tmpdir(), 'lara-tmx-imports');"
+   }
+  ],
+  "reason": "The path is built entirely by the server (fixed temp directory + timestamp + random suffix); only the file content (tmx_content, capped at 5MB) comes from the tool arguments, and the file is deleted in finally. No attacker control over where it is written.",
+  "quotes_verified": 2
+ },
+ {
+  "rule": "NETWORK-EXPOSURE",
+  "title": "HTTP transport binds 0.0.0.0 by default with wildcard CORS",
+  "verdict": "confirmed",
+  "severity": "low",
+  "evidence": [
+   {
+    "file": "src/env.ts",
+    "line": 5,
+    "quote": "HOST: z.string().default(\"0.0.0.0\"),"
+   },
+   {
+    "file": "src/rest/server.ts",
+    "line": 41,
+    "quote": "// Bind specifically on 127.0.0.1 to avoid binding to all interfaces"
+   },
+   {
+    "file": "src/rest/middleware/cors.ts",
+    "line": 3,
+    "quote": "const corsMiddleware = cors({"
+   }
+  ],
+  "reason": "Contrary to the comment, the HTTP server listens on all interfaces by default and cors() without an origin option answers any Origin; impact is limited because every /mcp request must carry the caller's own Lara keys (no server-held credential), so it mainly exposes a free relay and the debug logs.",
+  "fix": "Default HOST to 127.0.0.1 (set 0.0.0.0 only in the Docker env), set an explicit CORS origin allowlist and validate Origin/Host on /mcp.",
+  "id": "M001",
+  "quotes_verified": 3
+ },
+ {
+  "rule": "NO-APPROVAL",
+  "title": "delete_memory / delete_translation delete account data with no confirmation",
+  "verdict": "confirmed",
+  "severity": "medium",
+  "evidence": [
+   {
+    "file": "src/mcp/tools/delete_memory.ts",
+    "line": 12,
+    "quote": "export async function deleteMemory(args: any, lara: Translator) {"
+   },
+   {
+    "file": "src/mcp/tools/delete_memory.ts",
+    "line": 15,
+    "quote": "return await lara.memories.delete(id);"
+   }
+  ],
+  "reason": "A prompt injection in any text the agent is translating can make it call list_memories then delete_memory on every id, permanently destroying the user's translation memories; there is no confirmation, dry-run or destructive hint.",
+  "fix": "Mark these tools destructiveHint: true so clients ask for approval, require an explicit confirm argument matching the memory name, or move deletes out of the MCP tool set.",
+  "id": "M002",
+  "quotes_verified": 2
+ },
+ {
+  "rule": "SECRET-IN-LOGS",
+  "title": "Debug logging writes full MCP request bodies and the access key id",
+  "verdict": "confirmed",
+  "severity": "low",
+  "evidence": [
+   {
+    "file": "src/rest/middleware/logging.ts",
+    "line": 43,
+    "quote": "logger.debug(`Body: ${JSON.stringify(sanitizeBody(req.body), null, 2)}`);"
+   },
+   {
+    "file": "src/mcp/server.ts",
+    "line": 17,
+    "quote": "logger.debug(\"Creating MCP server with credentials: \" + accessKeyId);"
+   }
+  ],
+  "reason": "sanitizeBody only redacts top-level keys, so at debug level every tool call's arguments (texts being translated, TMX content) and responses are logged, together with each caller's Lara access key id; the secret itself is redacted.",
+  "fix": "Do not log JSON-RPC params/results or key ids; log method name and tool name only.",
+  "id": "M003",
+  "quotes_verified": 2
+ }
+]

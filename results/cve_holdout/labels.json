@@ -1,0 +1,528 @@
+[
+  {
+    "id": "h01",
+    "ghsa": "GHSA-frq9-3hp2-xvxg",
+    "cve": "CVE-2025-5276",
+    "repo": "zcaceres/markdownify-mcp",
+    "language": "typescript",
+    "class": "SSRF",
+    "vuln_ref": "949f12e633320548c565c6ec892d33695b158d64",
+    "fixed_ref": "0284aa8f34d32c65e20d8cda2d429b7943c9af03",
+    "files": [
+      "src/server.ts",
+      "src/Markdownify.ts"
+    ],
+    "functions_or_tools": [
+      "webpage-to-markdown",
+      "Markdownify.toMarkdown"
+    ],
+    "summary": "The url argument of the webpage-to-markdown tool is fetched server-side with no scheme or private/internal address check, allowing requests to internal hosts.",
+    "advisory_url": "https://github.com/advisories/GHSA-frq9-3hp2-xvxg"
+  },
+  {
+    "id": "h02",
+    "ghsa": "GHSA-6f6r-m9pv-67jw",
+    "cve": "CVE-2025-52573",
+    "repo": "joshuayoes/ios-simulator-mcp",
+    "language": "typescript",
+    "class": "OS command injection",
+    "vuln_ref": "042fdb758e0db8874ed2ca7a5ea125dfc412f4d9",
+    "fixed_ref": "eb53a4f2cc8bbeb13e8d6d930f00167befcdb809",
+    "files": [
+      "src/index.ts"
+    ],
+    "functions_or_tools": [
+      "ui_tap",
+      "ui_type",
+      "ui_swipe",
+      "ui_describe_point",
+      "screenshot",
+      "record_video"
+    ],
+    "summary": "Tool parameters (udid, coordinates, text, output paths) are interpolated into xcrun/idb command strings executed with child_process.exec, so shell metacharacters run arbitrary commands.",
+    "advisory_url": "https://github.com/advisories/GHSA-6f6r-m9pv-67jw"
+  },
+  {
+    "id": "h03",
+    "ghsa": "GHSA-gjv4-ghm7-q58q",
+    "cve": "CVE-2025-53355",
+    "repo": "Flux159/mcp-server-kubernetes",
+    "language": "typescript",
+    "class": "OS command injection",
+    "vuln_ref": "e4a68628c53a408dc8b94de415cf935855979662",
+    "fixed_ref": "ab165f5a0eea917fef5dbae954506fff6f4bf514",
+    "files": [
+      "src/tools/kubectl-get.ts",
+      "src/tools/kubectl-describe.ts",
+      "src/tools/kubectl-logs.ts",
+      "src/tools/kubectl-generic.ts",
+      "src/tools/kubectl-delete.ts",
+      "src/tools/helm-operations.ts",
+      "src/tools/kubectl-create.ts",
+      "src/tools/kubectl-scale.ts",
+      "src/tools/kubectl-patch.ts",
+      "src/tools/kubectl-rollout.ts",
+      "src/tools/kubectl-context.ts",
+      "src/tools/kubectl-apply.ts"
+    ],
+    "functions_or_tools": [
+      "kubectlGet",
+      "kubectlDescribe",
+      "kubectlLogs",
+      "kubectlGeneric",
+      "kubectlDelete",
+      "installHelmChart",
+      "upgradeHelmChart",
+      "uninstallHelmChart"
+    ],
+    "summary": "Tool arguments such as resource names, namespaces and flags are concatenated into kubectl/helm command strings passed to execSync, allowing shell command injection.",
+    "advisory_url": "https://github.com/advisories/GHSA-gjv4-ghm7-q58q"
+  },
+  {
+    "id": "h04",
+    "ghsa": "GHSA-5w57-2ccq-8w95",
+    "cve": "CVE-2025-53372",
+    "repo": "alfonsograziano/node-code-sandbox-mcp",
+    "language": "typescript",
+    "class": "OS command injection",
+    "vuln_ref": "7fd7fb88be2cb2a03702915d05d03bdf6bc8ac80",
+    "fixed_ref": "19a1ff3386c5bc00eb1f2052a4fa8f8379bb8fea",
+    "files": [
+      "src/tools/runJs.ts",
+      "src/tools/runJsEphemeral.ts",
+      "src/tools/stop.ts",
+      "src/tools/exec.ts",
+      "src/tools/initialize.ts",
+      "src/dockerUtils.ts"
+    ],
+    "functions_or_tools": [
+      "run_js",
+      "run_js_ephemeral",
+      "sandbox_stop",
+      "sandbox_exec",
+      "sandbox_initialize"
+    ],
+    "summary": "container_id, dependency names and similar tool inputs are interpolated into docker CLI strings run by execSync on the host, escaping the container sandbox.",
+    "advisory_url": "https://github.com/advisories/GHSA-5w57-2ccq-8w95"
+  },
+  {
+    "id": "h05",
+    "ghsa": "GHSA-xj5p-8h7g-76m7",
+    "cve": "CVE-2025-53832",
+    "repo": "translated/lara-mcp",
+    "language": "typescript",
+    "class": "OS command injection",
+    "vuln_ref": "ab6ddeb55ab87c0df28822f968b7e24364ca02c5",
+    "fixed_ref": "e534ef690adf390e4ac862a200b2a83f6cf45944",
+    "files": [
+      "src/tools/import_tmx.ts"
+    ],
+    "functions_or_tools": [
+      "import_tmx",
+      "importTmx"
+    ],
+    "summary": "The tmx_url argument of import_tmx is placed inside a curl command string executed via child_process.exec, enabling shell injection.",
+    "advisory_url": "https://github.com/advisories/GHSA-xj5p-8h7g-76m7"
+  },
+  {
+    "id": "h06",
+    "ghsa": "GHSA-vf9j-h32g-2764",
+    "cve": "CVE-2025-54073",
+    "repo": "sammcj/mcp-package-docs",
+    "language": "typescript",
+    "class": "OS command injection",
+    "vuln_ref": "8e9bd31f77cf731a15383577326ae777f52bf425",
+    "fixed_ref": "cb4ad49615275379fd6f2f1cf1ec4731eec56eb9",
+    "files": [
+      "src/package-docs-server.ts"
+    ],
+    "functions_or_tools": [
+      "getLocalGoDoc",
+      "getLocalPythonDoc",
+      "getLocalSwiftDoc",
+      "describeGoPackage",
+      "searchPackageDocs",
+      "describe_go_package",
+      "describe_python_package",
+      "describe_swift_package",
+      "search_package_docs"
+    ],
+    "summary": "Package names and symbols from tool arguments are interpolated into go doc / go list / python3 -c / swift command strings run with exec.",
+    "advisory_url": "https://github.com/advisories/GHSA-vf9j-h32g-2764"
+  },
+  {
+    "id": "h07",
+    "ghsa": "GHSA-45qj-4xq3-3c45",
+    "cve": "CVE-2025-58358",
+    "repo": "zcaceres/markdownify-mcp",
+    "language": "typescript",
+    "class": "OS command injection",
+    "vuln_ref": "8408f2326e46f92b1da3c8041aebdaf19bc80a91",
+    "fixed_ref": "a31204de058b22a47e1dcc24508993cfe97e5bb3",
+    "files": [
+      "src/Markdownify.ts",
+      "src/UVX.ts"
+    ],
+    "functions_or_tools": [
+      "Markdownify._markitdown",
+      "pptx-to-markdown",
+      "toMarkdown"
+    ],
+    "summary": "The filepath argument of the *-to-markdown tools is embedded in a quoted 'uv run markitdown \"<path>\"' command string executed with exec, so crafted paths inject shell commands.",
+    "advisory_url": "https://github.com/advisories/GHSA-45qj-4xq3-3c45"
+  },
+  {
+    "id": "h08",
+    "ghsa": "GHSA-g5cg-6c7v-mmpw",
+    "cve": "CVE-2025-59155",
+    "repo": "yuna0x0/hackmd-mcp",
+    "language": "typescript",
+    "class": "SSRF",
+    "vuln_ref": "35af63cdc8a1bc6a35c159686722722a81db94f7",
+    "fixed_ref": "43936c78a5bb3dedc74e8f080607a1125caa8c13",
+    "files": [
+      "index.ts"
+    ],
+    "functions_or_tools": [
+      "parseConfig",
+      "createServer"
+    ],
+    "summary": "In HTTP transport mode the client-supplied config (hackmdApiUrl) sets the API base URL the server requests with no allowlist, letting callers make the server reach arbitrary internal URLs.",
+    "advisory_url": "https://github.com/advisories/GHSA-g5cg-6c7v-mmpw"
+  },
+  {
+    "id": "h09",
+    "ghsa": "GHSA-g2jx-37x6-6438",
+    "cve": "CVE-2025-66454",
+    "repo": "ArcadeAI/arcade-mcp",
+    "language": "python",
+    "class": "hardcoded secret",
+    "vuln_ref": "a921b76ce963cb11eba5cf6415566b09692d9c95",
+    "fixed_ref": "44660d18ceb220600401303df860a31ca766c817",
+    "files": [
+      "libs/arcade-mcp-server/arcade_mcp_server/settings.py",
+      "libs/arcade-mcp-server/arcade_mcp_server/worker.py"
+    ],
+    "functions_or_tools": [
+      "ArcadeSettings.server_secret",
+      "create_arcade_mcp",
+      "FastAPIWorker"
+    ],
+    "summary": "The worker endpoint secret defaults to the hardcoded value 'dev' when ARCADE_WORKER_SECRET is unset, so anyone can sign requests to the HTTP worker routes and invoke tools.",
+    "advisory_url": "https://github.com/advisories/GHSA-g2jx-37x6-6438"
+  },
+  {
+    "id": "h10",
+    "ghsa": "GHSA-8fxj-2g9q-8fjw",
+    "cve": "CVE-2025-65513",
+    "repo": "zcaceres/fetch-mcp",
+    "language": "typescript",
+    "class": "SSRF",
+    "vuln_ref": "c662c8ac300f715e414a64766cd95cc9ec60a1b3",
+    "fixed_ref": "e7659f8cca26ce051b65f5bc28418df155812b8e",
+    "files": [
+      "src/Fetcher.ts"
+    ],
+    "functions_or_tools": [
+      "Fetcher._fetch",
+      "fetch_html",
+      "fetch_markdown",
+      "fetch_txt",
+      "fetch_json"
+    ],
+    "summary": "The url tool argument is passed whole to private-ip (which does not parse full URLs or 'localhost') before fetch(), so internal/loopback URLs pass the check and are fetched.",
+    "advisory_url": "https://github.com/advisories/GHSA-8fxj-2g9q-8fjw"
+  },
+  {
+    "id": "h11",
+    "ghsa": "GHSA-xjgw-4wvw-rgm4",
+    "cve": "CVE-2026-27825",
+    "repo": "sooperset/mcp-atlassian",
+    "language": "python",
+    "class": "path traversal",
+    "vuln_ref": "ab36f8161bba807b16964f2c6124174c9eca1acf",
+    "fixed_ref": "52b9b0997681e87244b20d58034deae89c91631e",
+    "files": [
+      "src/mcp_atlassian/confluence/attachments.py",
+      "src/mcp_atlassian/jira/attachments.py"
+    ],
+    "functions_or_tools": [
+      "AttachmentsMixin.download_attachment",
+      "AttachmentsMixin.download_content_attachments",
+      "AttachmentsMixin.download_issue_attachments",
+      "download_attachment",
+      "download_content_attachments",
+      "download_attachments"
+    ],
+    "summary": "The download_path/target_path argument of the attachment download tools is written to without (Confluence) or with a symlink-unaware lexical (Jira) containment check, allowing arbitrary file writes.",
+    "advisory_url": "https://github.com/advisories/GHSA-xjgw-4wvw-rgm4"
+  },
+  {
+    "id": "h12",
+    "ghsa": "GHSA-7r34-79r5-rcc9",
+    "cve": "CVE-2026-27826",
+    "repo": "sooperset/mcp-atlassian",
+    "language": "python",
+    "class": "SSRF",
+    "vuln_ref": "52b9b0997681e87244b20d58034deae89c91631e",
+    "fixed_ref": "5cd697dfce9116ef330b8dc7a91291640e0528d9",
+    "files": [
+      "src/mcp_atlassian/servers/main.py",
+      "src/mcp_atlassian/servers/dependencies.py"
+    ],
+    "functions_or_tools": [
+      "UserTokenMiddleware",
+      "get_jira_fetcher",
+      "get_confluence_fetcher"
+    ],
+    "summary": "X-Atlassian-Jira-Url / X-Atlassian-Confluence-Url HTTP headers are accepted unvalidated as the backend base URL, making the server send authenticated requests to attacker-chosen hosts.",
+    "advisory_url": "https://github.com/advisories/GHSA-7r34-79r5-rcc9"
+  },
+  {
+    "id": "h13",
+    "ghsa": "GHSA-fmfg-9g7c-3vq7",
+    "cve": "CVE-2026-32111",
+    "repo": "homeassistant-ai/ha-mcp",
+    "language": "python",
+    "class": "SSRF",
+    "vuln_ref": "b703842474e612025f9c62be73835c0ea8deb4c2",
+    "fixed_ref": "dc8eaa16a8550f885614655f14b6fd9fe429b278",
+    "files": [
+      "src/ha_mcp/auth/provider.py",
+      "src/ha_mcp/auth/consent_form.py",
+      "src/ha_mcp/__main__.py"
+    ],
+    "functions_or_tools": [
+      "_validate_ha_credentials",
+      "HomeAssistantOAuthProvider"
+    ],
+    "summary": "The user-supplied ha_url from the OAuth consent form (and from unsigned OAuth tokens) is requested server-side as {ha_url}/api/config with no URL validation, giving an SSRF error oracle.",
+    "advisory_url": "https://github.com/advisories/GHSA-fmfg-9g7c-3vq7"
+  },
+  {
+    "id": "h14",
+    "ghsa": "GHSA-3xm7-qw7j-qc8v",
+    "cve": "CVE-2026-33060",
+    "repo": "ondata/ckan-mcp-server",
+    "language": "typescript",
+    "class": "SSRF",
+    "vuln_ref": "02080edbc7cf665391438ca29381a014540d4aae",
+    "fixed_ref": "a784036e377a17ecf8d05bc1c142be98a6d43af4",
+    "files": [
+      "src/utils/http.ts",
+      "src/tools/sparql.ts"
+    ],
+    "functions_or_tools": [
+      "makeCkanRequest",
+      "querySparqlEndpoint",
+      "ckan_package_search",
+      "sparql_query"
+    ],
+    "summary": "The base_url / endpoint arguments of CKAN and SPARQL tools are requested directly with no private-address or metadata-endpoint blocking.",
+    "advisory_url": "https://github.com/advisories/GHSA-3xm7-qw7j-qc8v"
+  },
+  {
+    "id": "h15",
+    "ghsa": "GHSA-wvr4-3wq4-gpc5",
+    "cve": null,
+    "repo": "EvalsOne/MCP-connect",
+    "language": "typescript",
+    "class": "missing authentication on HTTP/SSE transport",
+    "vuln_ref": "4e0e68b9de70d2fb4503057978f695f3abc37c22",
+    "fixed_ref": "245bd7fabcb6889fec2979ffc08daa659d848c30",
+    "files": [
+      "src/config/config.ts",
+      "src/server/http-server.ts",
+      "src/client/mcp-client-manager.ts"
+    ],
+    "functions_or_tools": [
+      "loadConfig",
+      "validateConfig",
+      "HttpServer auth middleware",
+      "/bridge",
+      "createClient"
+    ],
+    "summary": "With no AUTH_TOKEN/ACCESS_TOKEN set the auth middleware is skipped, so unauthenticated POST /bridge requests supply serverPath/args that are spawned as a local process.",
+    "advisory_url": "https://github.com/advisories/GHSA-wvr4-3wq4-gpc5"
+  },
+  {
+    "id": "h16",
+    "ghsa": "GHSA-3p2m-h2v6-g9mx",
+    "cve": "CVE-2026-33989",
+    "repo": "mobile-next/mobile-mcp",
+    "language": "typescript",
+    "class": "path traversal",
+    "vuln_ref": "bf1a0bd0c7964cb775feefba730987786ceb61f7",
+    "fixed_ref": "f5e32295903128c1e71cf915ae6c0b76c7b0153b",
+    "files": [
+      "src/server.ts"
+    ],
+    "functions_or_tools": [
+      "mobile_save_screenshot",
+      "mobile_start_screen_recording"
+    ],
+    "summary": "The saveTo/output path arguments are used as-is for writing screenshot and recording files, allowing writes to arbitrary filesystem locations.",
+    "advisory_url": "https://github.com/advisories/GHSA-3p2m-h2v6-g9mx"
+  },
+  {
+    "id": "h17",
+    "ghsa": "GHSA-75hx-xj24-mqrw",
+    "cve": null,
+    "repo": "czlonkowski/n8n-mcp",
+    "language": "typescript",
+    "class": "missing authentication on HTTP/SSE transport",
+    "vuln_ref": "ff486ea04f0b20460141e5ef2be3d518e1772b80",
+    "fixed_ref": "ca9d4b3df6419b8338983be98f7940400f78bde3",
+    "files": [
+      "src/http-server-single-session.ts"
+    ],
+    "functions_or_tools": [
+      "DELETE /mcp",
+      "GET /mcp",
+      "/health",
+      "SingleSessionHTTPServer.start"
+    ],
+    "summary": "Several HTTP transport endpoints (session GET/DELETE, health) were served without Bearer authentication, letting unauthenticated callers terminate sessions and read operational metadata.",
+    "advisory_url": "https://github.com/advisories/GHSA-75hx-xj24-mqrw"
+  },
+  {
+    "id": "h18",
+    "ghsa": "GHSA-4xqg-gf5c-ghwq",
+    "cve": "CVE-2026-39884",
+    "repo": "Flux159/mcp-server-kubernetes",
+    "language": "typescript",
+    "class": "argument injection",
+    "vuln_ref": "1060f23e31468a3383ac97953bbae2bfb678f4ce",
+    "fixed_ref": "fd93b486d1f90688db968acd87726dc70677f01b",
+    "files": [
+      "src/tools/port_forward.ts"
+    ],
+    "functions_or_tools": [
+      "startPortForward",
+      "port_forward"
+    ],
+    "summary": "namespace/resourceType/resourceName/port inputs are concatenated into a kubectl command string that is split on spaces before spawn(), letting embedded spaces inject extra kubectl flags.",
+    "advisory_url": "https://github.com/advisories/GHSA-4xqg-gf5c-ghwq"
+  },
+  {
+    "id": "h19",
+    "ghsa": "GHSA-j98m-w3xp-9f56",
+    "cve": "CVE-2026-40576",
+    "repo": "haris-musa/excel-mcp-server",
+    "language": "python",
+    "class": "path traversal",
+    "vuln_ref": "de4dc75f6ba629ccd2e097f5963235846be622e6",
+    "fixed_ref": "f51340ecd5778952405044b203d3a2d4c8a46833",
+    "files": [
+      "src/excel_mcp/server.py"
+    ],
+    "functions_or_tools": [
+      "get_excel_path"
+    ],
+    "summary": "get_excel_path returns absolute filepaths unchanged and joins relative ones without resolving, so tool filepath arguments escape EXCEL_FILES_PATH for arbitrary read/write.",
+    "advisory_url": "https://github.com/advisories/GHSA-j98m-w3xp-9f56"
+  },
+  {
+    "id": "h20",
+    "ghsa": "GHSA-p4h8-56qp-hpgv",
+    "cve": null,
+    "repo": "AiondaDotCom/mcp-ssh",
+    "language": "javascript",
+    "class": "argument injection",
+    "vuln_ref": "c7638cb0afa938f2342e083f40c2e9d8374fb2f7",
+    "fixed_ref": "1b6ac6d1ce99b299ada88ffc04a05a3b6d06820c",
+    "files": [
+      "server.mjs"
+    ],
+    "functions_or_tools": [
+      "SSHClient.runRemoteCommand",
+      "SSHClient.uploadFile",
+      "SSHClient.downloadFile",
+      "SSHClient.getHostInfo",
+      "SSHClient.checkConnectivity",
+      "SSHClient.runCommandBatch"
+    ],
+    "summary": "The hostAlias argument is passed to ssh/scp without a '--' terminator, so values like -oProxyCommand=... are parsed as options and execute local commands (plus shell:true on Windows).",
+    "advisory_url": "https://github.com/advisories/GHSA-p4h8-56qp-hpgv"
+  },
+  {
+    "id": "h21",
+    "ghsa": "GHSA-qhfq-gvvc-5q6q",
+    "cve": "CVE-2025-66335",
+    "repo": "apache/doris-mcp-server",
+    "language": "python",
+    "class": "SQL injection",
+    "vuln_ref": "067f160b3e072d703ec274f2544978942517600c",
+    "fixed_ref": "81305ffbf97482e29abf70dc0ba9be928ed39df5",
+    "files": [
+      "doris_mcp_server/utils/security.py",
+      "doris_mcp_server/utils/query_executor.py"
+    ],
+    "functions_or_tools": [
+      "SQLSecurityValidator.validate",
+      "exec_query"
+    ],
+    "summary": "SQL passed to the query execution tool is validated only on its first parsed statement, so stacked statements bypass the blocked-keyword and access checks and execute.",
+    "advisory_url": "https://github.com/advisories/GHSA-qhfq-gvvc-5q6q"
+  },
+  {
+    "id": "h22",
+    "ghsa": "GHSA-gc2j-wpjv-jhrw",
+    "cve": "CVE-2026-7645",
+    "repo": "ruvnet/sublinear-time-solver",
+    "language": "javascript",
+    "class": "path traversal",
+    "vuln_ref": "1210646955f33abe5c91f894cc7b04d024f62408",
+    "fixed_ref": "a701296e363192be863e79d788fa268095e3d229",
+    "files": [
+      "src/consciousness-explorer/mcp/server.js",
+      "src/consciousness-explorer/index.js"
+    ],
+    "functions_or_tools": [
+      "export_state",
+      "import_state",
+      "handleExportState",
+      "handleImportState"
+    ],
+    "summary": "The filename/path argument of the export_state MCP tool is used directly as a write path, allowing traversal to write files anywhere.",
+    "advisory_url": "https://github.com/advisories/GHSA-gc2j-wpjv-jhrw"
+  },
+  {
+    "id": "h23",
+    "ghsa": "GHSA-hrcw-xc63-g29m",
+    "cve": "CVE-2026-42078",
+    "repo": "icip-cas/PPTAgent",
+    "language": "python",
+    "class": "path traversal",
+    "vuln_ref": "858da237342f4fdf9e6c3e47baaef6f44647c8f0",
+    "fixed_ref": "418491a9a1c02d9d93194b5973bb58df35cf9d00",
+    "files": [
+      "pptagent/mcp_server.py",
+      "pptagent/utils.py"
+    ],
+    "functions_or_tools": [
+      "markdown_table_to_image",
+      "get_html_table_image"
+    ],
+    "summary": "The path argument of the markdown_table_to_image MCP tool is passed to get_html_table_image, which creates arbitrary directories and writes the image there.",
+    "advisory_url": "https://github.com/advisories/GHSA-hrcw-xc63-g29m"
+  },
+  {
+    "id": "h24",
+    "ghsa": "GHSA-89g2-xw5c-v95p",
+    "cve": "CVE-2026-42079",
+    "repo": "icip-cas/PPTAgent",
+    "language": "python",
+    "class": "code injection / eval",
+    "vuln_ref": "858da237342f4fdf9e6c3e47baaef6f44647c8f0",
+    "fixed_ref": "418491a9a1c02d9d93194b5973bb58df35cf9d00",
+    "files": [
+      "pptagent/apis.py"
+    ],
+    "functions_or_tools": [
+      "CodeExecutor.execute_actions"
+    ],
+    "summary": "LLM-generated slide-edit action lines are run with eval(line, {}, {...}) where builtins remain reachable, so injected expressions execute arbitrary Python.",
+    "advisory_url": "https://github.com/advisories/GHSA-89g2-xw5c-v95p"
+  }
+]

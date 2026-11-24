@@ -1,0 +1,1 @@
+labels.json sha256 8d33258caed2488abb1664b98bf52e121dbea460b7b3434fb4b0324b4863f8cb (24 advisories, chosen by a separate agent with fixed rules on 23 Nov 2026; not opened during development)

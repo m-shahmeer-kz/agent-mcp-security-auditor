@@ -1,0 +1,509 @@
+[
+ {
+  "dir": "c01",
+  "repo": "ondata/ckan-mcp-server",
+  "ref": "02080edbc7cf665391438ca29381a014540d4aae",
+  "roles": [
+   [
+    "h14",
+    "vuln_ref"
+   ]
+  ]
+ },
+ {
+  "dir": "c02",
+  "repo": "homeassistant-ai/ha-mcp",
+  "ref": "b703842474e612025f9c62be73835c0ea8deb4c2",
+  "roles": [
+   [
+    "h13",
+    "vuln_ref"
+   ]
+  ]
+ },
+ {
+  "dir": "c03",
+  "repo": "icip-cas/PPTAgent",
+  "ref": "418491a9a1c02d9d93194b5973bb58df35cf9d00",
+  "roles": [
+   [
+    "h23",
+    "fixed_ref"
+   ],
+   [
+    "h24",
+    "fixed_ref"
+   ]
+  ]
+ },
+ {
+  "dir": "c04",
+  "repo": "homeassistant-ai/ha-mcp",
+  "ref": "dc8eaa16a8550f885614655f14b6fd9fe429b278",
+  "roles": [
+   [
+    "h13",
+    "fixed_ref"
+   ]
+  ]
+ },
+ {
+  "dir": "c05",
+  "repo": "mobile-next/mobile-mcp",
+  "ref": "bf1a0bd0c7964cb775feefba730987786ceb61f7",
+  "roles": [
+   [
+    "h16",
+    "vuln_ref"
+   ]
+  ]
+ },
+ {
+  "dir": "c06",
+  "repo": "zcaceres/markdownify-mcp",
+  "ref": "a31204de058b22a47e1dcc24508993cfe97e5bb3",
+  "roles": [
+   [
+    "h07",
+    "fixed_ref"
+   ]
+  ]
+ },
+ {
+  "dir": "c07",
+  "repo": "Flux159/mcp-server-kubernetes",
+  "ref": "e4a68628c53a408dc8b94de415cf935855979662",
+  "roles": [
+   [
+    "h03",
+    "vuln_ref"
+   ]
+  ]
+ },
+ {
+  "dir": "c08",
+  "repo": "EvalsOne/MCP-connect",
+  "ref": "4e0e68b9de70d2fb4503057978f695f3abc37c22",
+  "roles": [
+   [
+    "h15",
+    "vuln_ref"
+   ]
+  ]
+ },
+ {
+  "dir": "c09",
+  "repo": "Flux159/mcp-server-kubernetes",
+  "ref": "ab165f5a0eea917fef5dbae954506fff6f4bf514",
+  "roles": [
+   [
+    "h03",
+    "fixed_ref"
+   ]
+  ]
+ },
+ {
+  "dir": "c10",
+  "repo": "zcaceres/markdownify-mcp",
+  "ref": "0284aa8f34d32c65e20d8cda2d429b7943c9af03",
+  "roles": [
+   [
+    "h01",
+    "fixed_ref"
+   ]
+  ]
+ },
+ {
+  "dir": "c11",
+  "repo": "icip-cas/PPTAgent",
+  "ref": "858da237342f4fdf9e6c3e47baaef6f44647c8f0",
+  "roles": [
+   [
+    "h23",
+    "vuln_ref"
+   ],
+   [
+    "h24",
+    "vuln_ref"
+   ]
+  ]
+ },
+ {
+  "dir": "c12",
+  "repo": "ArcadeAI/arcade-mcp",
+  "ref": "44660d18ceb220600401303df860a31ca766c817",
+  "roles": [
+   [
+    "h09",
+    "fixed_ref"
+   ]
+  ]
+ },
+ {
+  "dir": "c13",
+  "repo": "sooperset/mcp-atlassian",
+  "ref": "5cd697dfce9116ef330b8dc7a91291640e0528d9",
+  "roles": [
+   [
+    "h12",
+    "fixed_ref"
+   ]
+  ]
+ },
+ {
+  "dir": "c14",
+  "repo": "mobile-next/mobile-mcp",
+  "ref": "f5e32295903128c1e71cf915ae6c0b76c7b0153b",
+  "roles": [
+   [
+    "h16",
+    "fixed_ref"
+   ]
+  ]
+ },
+ {
+  "dir": "c15",
+  "repo": "zcaceres/fetch-mcp",
+  "ref": "c662c8ac300f715e414a64766cd95cc9ec60a1b3",
+  "roles": [
+   [
+    "h10",
+    "vuln_ref"
+   ]
+  ]
+ },
+ {
+  "dir": "c16",
+  "repo": "ArcadeAI/arcade-mcp",
+  "ref": "a921b76ce963cb11eba5cf6415566b09692d9c95",
+  "roles": [
+   [
+    "h09",
+    "vuln_ref"
+   ]
+  ]
+ },
+ {
+  "dir": "c17",
+  "repo": "sammcj/mcp-package-docs",
+  "ref": "cb4ad49615275379fd6f2f1cf1ec4731eec56eb9",
+  "roles": [
+   [
+    "h06",
+    "fixed_ref"
+   ]
+  ]
+ },
+ {
+  "dir": "c18",
+  "repo": "translated/lara-mcp",
+  "ref": "ab6ddeb55ab87c0df28822f968b7e24364ca02c5",
+  "roles": [
+   [
+    "h05",
+    "vuln_ref"
+   ]
+  ]
+ },
+ {
+  "dir": "c19",
+  "repo": "zcaceres/markdownify-mcp",
+  "ref": "8408f2326e46f92b1da3c8041aebdaf19bc80a91",
+  "roles": [
+   [
+    "h07",
+    "vuln_ref"
+   ]
+  ]
+ },
+ {
+  "dir": "c20",
+  "repo": "apache/doris-mcp-server",
+  "ref": "81305ffbf97482e29abf70dc0ba9be928ed39df5",
+  "roles": [
+   [
+    "h21",
+    "fixed_ref"
+   ]
+  ]
+ },
+ {
+  "dir": "c21",
+  "repo": "sammcj/mcp-package-docs",
+  "ref": "8e9bd31f77cf731a15383577326ae777f52bf425",
+  "roles": [
+   [
+    "h06",
+    "vuln_ref"
+   ]
+  ]
+ },
+ {
+  "dir": "c22",
+  "repo": "ruvnet/sublinear-time-solver",
+  "ref": "1210646955f33abe5c91f894cc7b04d024f62408",
+  "roles": [
+   [
+    "h22",
+    "vuln_ref"
+   ]
+  ]
+ },
+ {
+  "dir": "c23",
+  "repo": "sooperset/mcp-atlassian",
+  "ref": "52b9b0997681e87244b20d58034deae89c91631e",
+  "roles": [
+   [
+    "h11",
+    "fixed_ref"
+   ],
+   [
+    "h12",
+    "vuln_ref"
+   ]
+  ]
+ },
+ {
+  "dir": "c24",
+  "repo": "Flux159/mcp-server-kubernetes",
+  "ref": "fd93b486d1f90688db968acd87726dc70677f01b",
+  "roles": [
+   [
+    "h18",
+    "fixed_ref"
+   ]
+  ]
+ },
+ {
+  "dir": "c25",
+  "repo": "apache/doris-mcp-server",
+  "ref": "067f160b3e072d703ec274f2544978942517600c",
+  "roles": [
+   [
+    "h21",
+    "vuln_ref"
+   ]
+  ]
+ },
+ {
+  "dir": "c26",
+  "repo": "Flux159/mcp-server-kubernetes",
+  "ref": "1060f23e31468a3383ac97953bbae2bfb678f4ce",
+  "roles": [
+   [
+    "h18",
+    "vuln_ref"
+   ]
+  ]
+ },
+ {
+  "dir": "c27",
+  "repo": "haris-musa/excel-mcp-server",
+  "ref": "f51340ecd5778952405044b203d3a2d4c8a46833",
+  "roles": [
+   [
+    "h19",
+    "fixed_ref"
+   ]
+  ]
+ },
+ {
+  "dir": "c28",
+  "repo": "translated/lara-mcp",
+  "ref": "e534ef690adf390e4ac862a200b2a83f6cf45944",
+  "roles": [
+   [
+    "h05",
+    "fixed_ref"
+   ]
+  ]
+ },
+ {
+  "dir": "c29",
+  "repo": "joshuayoes/ios-simulator-mcp",
+  "ref": "eb53a4f2cc8bbeb13e8d6d930f00167befcdb809",
+  "roles": [
+   [
+    "h02",
+    "fixed_ref"
+   ]
+  ]
+ },
+ {
+  "dir": "c30",
+  "repo": "joshuayoes/ios-simulator-mcp",
+  "ref": "042fdb758e0db8874ed2ca7a5ea125dfc412f4d9",
+  "roles": [
+   [
+    "h02",
+    "vuln_ref"
+   ]
+  ]
+ },
+ {
+  "dir": "c31",
+  "repo": "zcaceres/fetch-mcp",
+  "ref": "e7659f8cca26ce051b65f5bc28418df155812b8e",
+  "roles": [
+   [
+    "h10",
+    "fixed_ref"
+   ]
+  ]
+ },
+ {
+  "dir": "c32",
+  "repo": "zcaceres/markdownify-mcp",
+  "ref": "949f12e633320548c565c6ec892d33695b158d64",
+  "roles": [
+   [
+    "h01",
+    "vuln_ref"
+   ]
+  ]
+ },
+ {
+  "dir": "c33",
+  "repo": "yuna0x0/hackmd-mcp",
+  "ref": "43936c78a5bb3dedc74e8f080607a1125caa8c13",
+  "roles": [
+   [
+    "h08",
+    "fixed_ref"
+   ]
+  ]
+ },
+ {
+  "dir": "c34",
+  "repo": "EvalsOne/MCP-connect",
+  "ref": "245bd7fabcb6889fec2979ffc08daa659d848c30",
+  "roles": [
+   [
+    "h15",
+    "fixed_ref"
+   ]
+  ]
+ },
+ {
+  "dir": "c35",
+  "repo": "czlonkowski/n8n-mcp",
+  "ref": "ff486ea04f0b20460141e5ef2be3d518e1772b80",
+  "roles": [
+   [
+    "h17",
+    "vuln_ref"
+   ]
+  ]
+ },
+ {
+  "dir": "c36",
+  "repo": "AiondaDotCom/mcp-ssh",
+  "ref": "c7638cb0afa938f2342e083f40c2e9d8374fb2f7",
+  "roles": [
+   [
+    "h20",
+    "vuln_ref"
+   ]
+  ]
+ },
+ {
+  "dir": "c37",
+  "repo": "ondata/ckan-mcp-server",
+  "ref": "a784036e377a17ecf8d05bc1c142be98a6d43af4",
+  "roles": [
+   [
+    "h14",
+    "fixed_ref"
+   ]
+  ]
+ },
+ {
+  "dir": "c38",
+  "repo": "haris-musa/excel-mcp-server",
+  "ref": "de4dc75f6ba629ccd2e097f5963235846be622e6",
+  "roles": [
+   [
+    "h19",
+    "vuln_ref"
+   ]
+  ]
+ },
+ {
+  "dir": "c39",
+  "repo": "AiondaDotCom/mcp-ssh",
+  "ref": "1b6ac6d1ce99b299ada88ffc04a05a3b6d06820c",
+  "roles": [
+   [
+    "h20",
+    "fixed_ref"
+   ]
+  ]
+ },
+ {
+  "dir": "c40",
+  "repo": "yuna0x0/hackmd-mcp",
+  "ref": "35af63cdc8a1bc6a35c159686722722a81db94f7",
+  "roles": [
+   [
+    "h08",
+    "vuln_ref"
+   ]
+  ]
+ },
+ {
+  "dir": "c41",
+  "repo": "alfonsograziano/node-code-sandbox-mcp",
+  "ref": "7fd7fb88be2cb2a03702915d05d03bdf6bc8ac80",
+  "roles": [
+   [
+    "h04",
+    "vuln_ref"
+   ]
+  ]
+ },
+ {
+  "dir": "c42",
+  "repo": "ruvnet/sublinear-time-solver",
+  "ref": "a701296e363192be863e79d788fa268095e3d229",
+  "roles": [
+   [
+    "h22",
+    "fixed_ref"
+   ]
+  ]
+ },
+ {
+  "dir": "c43",
+  "repo": "czlonkowski/n8n-mcp",
+  "ref": "ca9d4b3df6419b8338983be98f7940400f78bde3",
+  "roles": [
+   [
+    "h17",
+    "fixed_ref"
+   ]
+  ]
+ },
+ {
+  "dir": "c44",
+  "repo": "sooperset/mcp-atlassian",
+  "ref": "ab36f8161bba807b16964f2c6124174c9eca1acf",
+  "roles": [
+   [
+    "h11",
+    "vuln_ref"
+   ]
+  ]
+ },
+ {
+  "dir": "c45",
+  "repo": "alfonsograziano/node-code-sandbox-mcp",
+  "ref": "19a1ff3386c5bc00eb1f2052a4fa8f8379bb8fea",
+  "roles": [
+   [
+    "h04",
+    "fixed_ref"
+   ]
+  ]
+ }
+]

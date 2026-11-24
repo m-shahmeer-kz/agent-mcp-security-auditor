@@ -1,0 +1,22 @@
+{
+  "what": "Full skill v1.0.0 run by fresh agents on 45 blind checkouts (vulnerable + fixed versions of 24 sealed MCP advisories). Each advisory hand-checked against the agent's verified findings.",
+  "caught_confirmed": ["h01","h02","h03","h04","h05","h06","h07","h08","h10","h12","h13","h14","h15","h16","h17","h18","h19","h20","h21","h22","h23"],
+  "found_but_needs_context": ["h09"],
+  "missed": {"h11": "found a real upload/read issue in the same files, not the download-path write in the advisory", "h24": "eval() of LLM action lines in pptagent/apis.py not reported"},
+  "strict_auto_score_differences": {"h11": "auto-score counted a hit (same file, same class) but it was a different issue", "h17": "auto-score missed it because the agent used rule name AUTH", "h13": "auto-score missed it because the agent used rule name AUTH", "h09": "auto-score counts confirmed only; agent marked it needs_context"},
+  "after_fix": {
+    "not_flagged_again": ["h02","h03","h04","h05","h08","h12","h13","h15","h16","h17","h18","h20","h21","h22","h23"],
+    "flagged_again": {
+      "h06": "real leftover: Python package name still injected into python3 -c code (checked in code)",
+      "h07": "real leftover: hidden uvPath tool argument still chooses the program run by execFile (checked in code)",
+      "h01": "remaining gap: private-IP check on the literal hostname only (DNS names, redirects)",
+      "h10": "remaining gap: same literal-hostname check",
+      "h14": "remaining gap: same literal-hostname check",
+      "h19": "arguable: stdio mode accepts absolute paths by design; the SSE-mode guard was judged correct"
+    }
+  },
+  "scanner_only_v1.0.0": "7/24 (benchmarks/results/cve_scanner_v1.0.0.json)",
+  "strict_auto_score": "20/24 (benchmarks/results/cve_agent_strict_v1.0.0.json)",
+  "all_45_reached_verify_ok": true,
+  "notes": "2 of 45 scans (same very large repo, ~7,800 files) did not finish in 15 minutes; the agent reviewed by hand and had to write placeholder scan files for verify/report to run."
+}

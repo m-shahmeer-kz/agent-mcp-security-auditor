@@ -1,0 +1,244 @@
+[
+ {
+  "rule": "TOOL-POISONING",
+  "severity": "info",
+  "file": "src/tools/portal-discovery.ts",
+  "line": 90,
+  "quote": "server.registerTool(",
+  "message": "Tool 'ckan_find_portals' has a description with hidden or manipulative instructions for the AI (score 35/100): cross-tool-control: 'before calling this tool'; names-other-tool: 'ckan_package_search, ckan_status_show'",
+  "confidence": "medium",
+  "owasp": "ASI01 Agent Goal Hijack / ASI04 Agentic Supply Chain",
+  "fix": "None needed.",
+  "tool": "ckan_find_portals",
+  "signals": [
+   "cross-tool-control",
+   "names-other-tool"
+  ],
+  "id": "F001",
+  "verdict": "false_positive",
+  "evidence": [
+   {
+    "file": "src/tools/portal-discovery.ts",
+    "line": 114,
+    "quote": "Typical workflow: ckan_find_portals (discover portal URL) → ckan_status_show (verify) → ckan_package_search (search datasets)`,"
+   }
+  ],
+  "reason": "Ordinary usage guidance that serves the user's own request (translate the country name to English, suggested tool order); it does not override arguments, reach secrets, send data or hide anything from the user.",
+  "quotes_verified": 1
+ },
+ {
+  "rule": "HIDDEN-INSTRUCTIONS",
+  "severity": "info",
+  "file": ".claude/commands/astro_website.md",
+  "line": 140,
+  "quote": "<!-- Open Graph -->",
+  "message": "Agent instruction file contains text that tries to steer the AI in a hidden or unusual way: hidden-html-comment: '<!-- Open Graph -->'",
+  "confidence": "medium",
+  "owasp": "ASI01 Agent Goal Hijack",
+  "fix": "None needed.",
+  "signals": [
+   "hidden-html-comment"
+  ],
+  "id": "F002",
+  "verdict": "false_positive",
+  "evidence": [
+   {
+    "file": ".claude/commands/astro_website.md",
+    "line": 140,
+    "quote": "<!-- Open Graph -->"
+   }
+  ],
+  "reason": "The HTML comment is a plain section label inside an Astro/HTML code sample; it contains no instruction to the model.",
+  "quotes_verified": 1
+ },
+ {
+  "rule": "SSRF",
+  "severity": "medium",
+  "file": "src/tools/sparql.ts",
+  "line": 68,
+  "quote": "response = await fetch(getUrl.toString(), {",
+  "message": "Tool input reaches a dangerous call: an HTTP request is sent to a URL taken from tool input.",
+  "confidence": "medium",
+  "owasp": "ASI02 Tool Misuse and Exploitation",
+  "fix": "Allowlist SPARQL endpoint hosts (e.g. those in portals.json) or resolve the host and reject private/loopback/link-local addresses, and disable redirects (redirect: 'manual') or re-check each hop.",
+  "source_line": 143,
+  "source_quote": "server.registerTool(",
+  "id": "F003",
+  "verdict": "confirmed",
+  "evidence": [
+   {
+    "file": "src/tools/sparql.ts",
+    "line": 190,
+    "quote": "const data = await querySparqlEndpoint(params.endpoint_url, limitedQuery);"
+   },
+   {
+    "file": "src/tools/sparql.ts",
+    "line": 68,
+    "quote": "response = await fetch(getUrl.toString(), {"
+   }
+  ],
+  "reason": "endpoint_url is any HTTPS URL (only the scheme is checked), so a steered sparql_query call makes the server send GET/POST requests with attacker-chosen body to internal HTTPS hosts (localhost, intranet); the status code is echoed back and SPARQL-shaped JSON is returned in full.",
+  "quotes_verified": 2
+ },
+ {
+  "rule": "SSRF",
+  "severity": "medium",
+  "file": "src/tools/sparql.ts",
+  "line": 74,
+  "quote": "response = await fetch(endpointUrl, {",
+  "message": "Tool input reaches a dangerous call: an HTTP request is sent to a URL taken from tool input.",
+  "confidence": "medium",
+  "owasp": "ASI02 Tool Misuse and Exploitation",
+  "fix": "Same as F003: host allowlist or private-address block after DNS resolution, no blind redirect following.",
+  "source_line": 143,
+  "source_quote": "server.registerTool(",
+  "id": "F004",
+  "verdict": "confirmed",
+  "evidence": [
+   {
+    "file": "src/tools/sparql.ts",
+    "line": 190,
+    "quote": "const data = await querySparqlEndpoint(params.endpoint_url, limitedQuery);"
+   },
+   {
+    "file": "src/tools/sparql.ts",
+    "line": 74,
+    "quote": "response = await fetch(endpointUrl, {"
+   }
+  ],
+  "reason": "Same sink as F003 (POST branch): an attacker-chosen HTTPS URL receives a POST with the attacker-chosen query as body.",
+  "quotes_verified": 2
+ },
+ {
+  "rule": "SSRF",
+  "severity": "medium",
+  "file": "src/tools/sparql.ts",
+  "line": 84,
+  "quote": "response = await fetch(getUrl.toString(), {",
+  "message": "Tool input reaches a dangerous call: an HTTP request is sent to a URL taken from tool input.",
+  "confidence": "medium",
+  "owasp": "ASI02 Tool Misuse and Exploitation",
+  "fix": "Same as F003.",
+  "source_line": 143,
+  "source_quote": "server.registerTool(",
+  "id": "F005",
+  "verdict": "confirmed",
+  "evidence": [
+   {
+    "file": "src/tools/sparql.ts",
+    "line": 190,
+    "quote": "const data = await querySparqlEndpoint(params.endpoint_url, limitedQuery);"
+   },
+   {
+    "file": "src/tools/sparql.ts",
+    "line": 84,
+    "quote": "response = await fetch(getUrl.toString(), {"
+   }
+  ],
+  "reason": "Same sink as F003 (GET fallback after 403/405).",
+  "quotes_verified": 2
+ },
+ {
+  "rule": "CORS-WILDCARD",
+  "severity": "info",
+  "file": "src/worker.ts",
+  "line": 272,
+  "quote": "headers.set('Access-Control-Allow-Origin', '*');",
+  "message": "CORS allows every origin, so any web page the user opens can call this server.",
+  "confidence": "medium",
+  "owasp": "ASI03 Identity and Privilege Abuse",
+  "fix": "Optional: restrict CORS to known MCP web clients if the demo ever gains auth or per-user state.",
+  "id": "F006",
+  "verdict": "false_positive",
+  "evidence": [
+   {
+    "file": "src/worker.ts",
+    "line": 272,
+    "quote": "headers.set('Access-Control-Allow-Origin', '*');"
+   },
+   {
+    "file": "src/worker.ts",
+    "line": 273,
+    "quote": "headers.set('X-Service-Notice', 'Demo instance - 100k requests/day shared quota');"
+   }
+  ],
+  "reason": "The Cloudflare worker is an intentionally public, unauthenticated, cookie-less demo over public open data; a cross-origin page gains nothing it could not get by calling the endpoint directly. (The real exposure issue is the Node HTTP transport, see M002.)",
+  "quotes_verified": 2
+ },
+ {
+  "rule": "SSRF",
+  "title": "server_url on every CKAN tool reaches any host/scheme, and the response body is echoed back in the error",
+  "verdict": "confirmed",
+  "severity": "high",
+  "evidence": [
+   {
+    "file": "src/tools/package.ts",
+    "line": 1117,
+    "quote": "params.server_url,"
+   },
+   {
+    "file": "src/utils/http.ts",
+    "line": 202,
+    "quote": "const url = `${baseUrl}${apiPath}/${action}`;"
+   },
+   {
+    "file": "src/utils/http.ts",
+    "line": 208,
+    "quote": "const response = await axios.get(url, {"
+   },
+   {
+    "file": "src/utils/http.ts",
+    "line": 274,
+    "quote": "`CKAN API returned success=false: ${JSON.stringify(decodedData)}`"
+   }
+  ],
+  "reason": "server_url is only checked with z.string().url(), so http://169.254.169.254/latest/meta-data/iam/security-credentials/<role>? (the trailing '?' turns the appended /api/3/action path into a query string) makes the Node server fetch cloud metadata or any internal URL, following redirects, and the non-CKAN body is returned verbatim to the model in the 'success=false' error text.",
+  "fix": "Require https, resolve the hostname and reject private/loopback/link-local/IPv6-local addresses (or restrict to portals.json / datashades hosts), set maxRedirects: 0 or re-validate each hop, and do not include the raw response body in error messages.",
+  "id": "M001",
+  "quotes_verified": 4
+ },
+ {
+  "rule": "NETWORK-EXPOSURE",
+  "title": "Node HTTP transport has no authentication, no Origin/Host check and listens on all interfaces",
+  "verdict": "confirmed",
+  "severity": "medium",
+  "evidence": [
+   {
+    "file": "src/transport/http.ts",
+    "line": 23,
+    "quote": "app.post('/mcp', async (req, res) => {"
+   },
+   {
+    "file": "src/transport/http.ts",
+    "line": 28,
+    "quote": "app.listen(port, () => {"
+   }
+  ],
+  "reason": "With TRANSPORT=http anyone on the network (or a DNS-rebinding web page) can call every tool without credentials, turning the M001/F003 SSRF into an open proxy into the host's internal network.",
+  "fix": "Bind to 127.0.0.1 by default (app.listen(port, '127.0.0.1')), validate Host/Origin headers, and require a bearer token when exposed beyond localhost.",
+  "id": "M002",
+  "quotes_verified": 2
+ },
+ {
+  "rule": "INDIRECT-INJECTION",
+  "title": "Third-party portal content is returned to the model unmarked",
+  "verdict": "confirmed",
+  "severity": "low",
+  "evidence": [
+   {
+    "file": "src/tools/package.ts",
+    "line": 1133,
+    "quote": "const markdown = formatPackageShowMarkdown(result, params.server_url);"
+   },
+   {
+    "file": "src/tools/package.ts",
+    "line": 1135,
+    "quote": "content: [{ type: \"text\", text: truncateText(addDemoFooter(markdown)) }]"
+   }
+  ],
+  "reason": "Dataset titles/descriptions from any CKAN portal (which anyone can publish to, and server_url can be any host) are inserted into the model context as plain markdown, so injected instructions there can steer later tool calls (e.g. into the M001 SSRF). Tools are read-only, which limits the impact.",
+  "fix": "Mark returned remote text as untrusted data (delimiters / structured fields only) and fix M001 so steered calls cannot reach internal hosts.",
+  "id": "M003",
+  "quotes_verified": 2
+ }
+]

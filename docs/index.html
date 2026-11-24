@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Agent &amp; MCP Security Auditor · is your AI agent safe to ship?</title>
+<meta name="description" content="AI-agent skill that audits AI agent apps and MCP servers for prompt injection, poisoned tool descriptions, leaked secrets, over-wide permissions and unsafe tool calls. Blind-tested on 24 real MCP security advisories.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Agent &amp; MCP Security Auditor · is your AI agent safe to ship?">
+<meta property="og:description" content="Local, read-only audit of agent apps and MCP servers with script-verified evidence. Blind test: 21 of 24 real MCP security advisories caught.">
+<meta property="og:url" content="https://m-shahmeer-kz.github.io/agent-mcp-security-auditor/">
+<meta property="og:image" content="https://m-shahmeer-kz.github.io/agent-mcp-security-auditor/assets/og.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="627">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="assets/logo.png">
+<style>
+:root{--bg:#060607;--card:#111113;--line:#26262b;--text:#f2f2f3;--mute:#9a9aa2;--ok:#7ee2a8;--bad:#ff8a8a;--warn:#ffd27a}
+*{box-sizing:border-box}html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:1040px;margin:0 auto;padding:40px 20px 70px}
+h1{font-size:clamp(32px,5.4vw,52px);line-height:1.04;margin:0 0 12px;letter-spacing:-.025em}
+h2{font-size:clamp(20px,3vw,27px);margin:48px 0 10px;letter-spacing:-.01em}
+p,li{color:#d6d6da}.sub{color:var(--mute);max-width:820px}a{color:var(--text)}
+code{font:13px ui-monospace,SFMono-Regular,Menlo,monospace;background:#17171a;border:1px solid var(--line);border-radius:5px;padding:1px 5px;overflow-wrap:anywhere}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 18px}
+.card h3{margin:0 0 6px;font-size:16px}.card p{margin:0;font-size:14px}
+.stat b{display:block;font-size:30px;line-height:1.1}.stat span{color:var(--mute);font-size:13px}
+.notice{border:1px solid var(--warn);color:var(--warn);border-radius:14px;padding:12px 16px;margin:18px 0;font-size:14px}
+.tbl{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:14px;margin:10px 0}
+th,td{border-bottom:1px solid var(--line);padding:8px;text-align:left;vertical-align:top}th{color:var(--mute);font-weight:500}
+.btns{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0}
+.btn{display:inline-block;padding:10px 18px;border:1px solid var(--line);border-radius:999px;text-decoration:none;font-size:14px}
+.btn.solid{background:var(--text);color:#000;border-color:var(--text);font-weight:600}
+.steps{counter-reset:s;list-style:none;padding:0}.steps li{counter-increment:s;margin:8px 0;padding-left:34px;position:relative}
+.steps li:before{content:counter(s);position:absolute;left:0;top:1px;width:24px;height:24px;border-radius:50%;border:1px solid var(--line);text-align:center;font-size:13px;line-height:23px;color:var(--mute)}
+.time{border-left:2px solid var(--line);margin:10px 0 0 6px;padding-left:16px}.time p{margin:6px 0}.time b{color:var(--text)}
+details summary{cursor:pointer;color:var(--mute)}
+</style><style>.ok{color:var(--ok)}.bad{color:var(--bad)}.warn{color:var(--warn)}small{color:var(--mute)}</style></head>
+<body><div class="wrap">
+<p class="sub" style="letter-spacing:.12em;text-transform:uppercase;font-size:12px">AI-agent skill · Claude Code · Codex · Cursor · Gemini CLI</p>
+<h1>Is your AI agent safe to ship?</h1>
+<p class="sub">Agent &amp; MCP Security Auditor lets your AI coding agent audit an AI agent app or MCP server before it goes to production.
+A local script finds the candidates: hidden instructions in tool descriptions and agent files (prompt injection, tool poisoning),
+command / argument injection, path traversal, SSRF, SQL and code injection in tool handlers (Python and TypeScript/JavaScript, followed across files),
+secrets, over-wide permissions, auto-approval and unpinned packages in MCP configs. Your agent then judges every candidate and adds what a script cannot see
+(missing authorization, refunds with no approval, untrusted text reaching the model). Every verdict must quote the exact code, and a second command
+rejects any quote that is not really there. Read-only: it never runs, installs or connects to what it audits.</p>
+<div class="btns"><a class="btn solid" href="https://www.agensi.io/creators/muhammad-shahmeer" target="_blank" rel="noopener">Get it on Agensi · $19 ↗</a><a class="btn" href="#cve">Blind test on real advisories</a><a class="btn" href="#buyer">Buyer test</a><a class="btn" href="https://github.com/m-shahmeer-kz/agent-mcp-security-auditor">GitHub ↗</a></div>
+
+<h2 id="cve">Blind test: 24 real MCP security advisories</h2>
+<p class="sub">A separate AI agent picked 24 published security advisories in open-source MCP servers with fixed rules (in date order, at most 6 per type)
+and sealed the list before I built the tests. I froze version 1.0.0. Then 15 fresh AI agents ran the full skill on 45 code checkouts:
+the version before each fix and the version after it, under neutral folder names, without being told what to look for. All 45 audits passed the quote check.</p>
+<div class="grid">
+ <div class="card stat"><b>21 / 24</b><span>advisories caught and confirmed (checked by hand; a strict automatic count gives 20 / 24)</span></div>
+ <div class="card stat"><b>+1</b><span>found but marked "needs context" instead of confirmed</span></div>
+ <div class="card stat"><b>15 / 21</b><span>not flagged again after the developers' fix</span></div>
+ <div class="card stat"><b>12 / 12</b><span>problems planted in a realistic agent app found, 0 of 9 safe decoys confirmed</span></div>
+</div>
+<p class="sub"><b>After the fix:</b> in 6 of the 21 cases the skill still raised something in the fixed code. I checked them: 2 are real holes the fix left behind
+(a package name still injected into <code>python3 -c</code> code; a hidden tool argument that still chooses which program runs), 3 are real gaps in the new
+address checks (they look only at the hostname as typed, so DNS names and redirects get through) and 1 is arguable (a local mode that accepts any file path).
+<b>The scanner alone</b> caught only 7 of 24: most of the catches come from the agent reading the code with the skill's guide, which is why the skill makes it judge every tool.</p>
+<details><summary>All 24 advisories, one by one</summary><div class="tbl"><table><tr><th>Advisory</th><th>Repo</th><th>Type</th><th>Lang</th><th>Before the fix</th><th>After the fix</th></tr><tr><td><a href="https://github.com/advisories/GHSA-frq9-3hp2-xvxg">CVE-2025-5276</a></td><td>zcaceres/markdownify-mcp</td><td>SSRF</td><td>typescript</td><td><span class="ok">caught</span></td><td><small>flagged again: remaining gap: private-IP check on the literal hostname only (DNS names, redirects)</small></td></tr><tr><td><a href="https://github.com/advisories/GHSA-6f6r-m9pv-67jw">CVE-2025-52573</a></td><td>joshuayoes/ios-simulator-mcp</td><td>OS command injection</td><td>typescript</td><td><span class="ok">caught</span></td><td><small>not flagged</small></td></tr><tr><td><a href="https://github.com/advisories/GHSA-gjv4-ghm7-q58q">CVE-2025-53355</a></td><td>Flux159/mcp-server-kubernetes</td><td>OS command injection</td><td>typescript</td><td><span class="ok">caught</span></td><td><small>not flagged</small></td></tr><tr><td><a href="https://github.com/advisories/GHSA-5w57-2ccq-8w95">CVE-2025-53372</a></td><td>alfonsograziano/node-code-sandbox-mcp</td><td>OS command injection</td><td>typescript</td><td><span class="ok">caught</span></td><td><small>not flagged</small></td></tr><tr><td><a href="https://github.com/advisories/GHSA-xj5p-8h7g-76m7">CVE-2025-53832</a></td><td>translated/lara-mcp</td><td>OS command injection</td><td>typescript</td><td><span class="ok">caught</span></td><td><small>not flagged</small></td></tr><tr><td><a href="https://github.com/advisories/GHSA-vf9j-h32g-2764">CVE-2025-54073</a></td><td>sammcj/mcp-package-docs</td><td>OS command injection</td><td>typescript</td><td><span class="ok">caught</span></td><td><small>flagged again: real leftover: Python package name still injected into python3 -c code (checked in code)</small></td></tr><tr><td><a href="https://github.com/advisories/GHSA-45qj-4xq3-3c45">CVE-2025-58358</a></td><td>zcaceres/markdownify-mcp</td><td>OS command injection</td><td>typescript</td><td><span class="ok">caught</span></td><td><small>flagged again: real leftover: hidden uvPath tool argument still chooses the program run by execFile (checked in code)</small></td></tr><tr><td><a href="https://github.com/advisories/GHSA-g5cg-6c7v-mmpw">CVE-2025-59155</a></td><td>yuna0x0/hackmd-mcp</td><td>SSRF</td><td>typescript</td><td><span class="ok">caught</span></td><td><small>not flagged</small></td></tr><tr><td><a href="https://github.com/advisories/GHSA-g2jx-37x6-6438">CVE-2025-66454</a></td><td>ArcadeAI/arcade-mcp</td><td>hardcoded secret</td><td>python</td><td><span class="warn">found, marked "needs context"</span></td><td><small>–</small></td></tr><tr><td><a href="https://github.com/advisories/GHSA-8fxj-2g9q-8fjw">CVE-2025-65513</a></td><td>zcaceres/fetch-mcp</td><td>SSRF</td><td>typescript</td><td><span class="ok">caught</span></td><td><small>flagged again: remaining gap: same literal-hostname check</small></td></tr><tr><td><a href="https://github.com/advisories/GHSA-xjgw-4wvw-rgm4">CVE-2026-27825</a></td><td>sooperset/mcp-atlassian</td><td>path traversal</td><td>python</td><td><span class="bad">missed</span> <small>(found a real upload/read issue in the same files, not the download-path write in the advisory)</small></td><td><small>–</small></td></tr><tr><td><a href="https://github.com/advisories/GHSA-7r34-79r5-rcc9">CVE-2026-27826</a></td><td>sooperset/mcp-atlassian</td><td>SSRF</td><td>python</td><td><span class="ok">caught</span></td><td><small>not flagged</small></td></tr><tr><td><a href="https://github.com/advisories/GHSA-fmfg-9g7c-3vq7">CVE-2026-32111</a></td><td>homeassistant-ai/ha-mcp</td><td>SSRF</td><td>python</td><td><span class="ok">caught</span></td><td><small>not flagged</small></td></tr><tr><td><a href="https://github.com/advisories/GHSA-3xm7-qw7j-qc8v">CVE-2026-33060</a></td><td>ondata/ckan-mcp-server</td><td>SSRF</td><td>typescript</td><td><span class="ok">caught</span></td><td><small>flagged again: remaining gap: same literal-hostname check</small></td></tr><tr><td><a href="https://github.com/advisories/GHSA-wvr4-3wq4-gpc5">GHSA-wvr4-3wq4-gpc5</a></td><td>EvalsOne/MCP-connect</td><td>missing authentication on HTTP/SSE transport</td><td>typescript</td><td><span class="ok">caught</span></td><td><small>not flagged</small></td></tr><tr><td><a href="https://github.com/advisories/GHSA-3p2m-h2v6-g9mx">CVE-2026-33989</a></td><td>mobile-next/mobile-mcp</td><td>path traversal</td><td>typescript</td><td><span class="ok">caught</span></td><td><small>not flagged</small></td></tr><tr><td><a href="https://github.com/advisories/GHSA-75hx-xj24-mqrw">GHSA-75hx-xj24-mqrw</a></td><td>czlonkowski/n8n-mcp</td><td>missing authentication on HTTP/SSE transport</td><td>typescript</td><td><span class="ok">caught</span></td><td><small>not flagged</small></td></tr><tr><td><a href="https://github.com/advisories/GHSA-4xqg-gf5c-ghwq">CVE-2026-39884</a></td><td>Flux159/mcp-server-kubernetes</td><td>argument injection</td><td>typescript</td><td><span class="ok">caught</span></td><td><small>not flagged</small></td></tr><tr><td><a href="https://github.com/advisories/GHSA-j98m-w3xp-9f56">CVE-2026-40576</a></td><td>haris-musa/excel-mcp-server</td><td>path traversal</td><td>python</td><td><span class="ok">caught</span></td><td><small>flagged again: arguable: stdio mode accepts absolute paths by design; the SSE-mode guard was judged correct</small></td></tr><tr><td><a href="https://github.com/advisories/GHSA-p4h8-56qp-hpgv">GHSA-p4h8-56qp-hpgv</a></td><td>AiondaDotCom/mcp-ssh</td><td>argument injection</td><td>javascript</td><td><span class="ok">caught</span></td><td><small>not flagged</small></td></tr><tr><td><a href="https://github.com/advisories/GHSA-qhfq-gvvc-5q6q">CVE-2025-66335</a></td><td>apache/doris-mcp-server</td><td>SQL injection</td><td>python</td><td><span class="ok">caught</span></td><td><small>not flagged</small></td></tr><tr><td><a href="https://github.com/advisories/GHSA-gc2j-wpjv-jhrw">CVE-2026-7645</a></td><td>ruvnet/sublinear-time-solver</td><td>path traversal</td><td>javascript</td><td><span class="ok">caught</span></td><td><small>not flagged</small></td></tr><tr><td><a href="https://github.com/advisories/GHSA-hrcw-xc63-g29m">CVE-2026-42078</a></td><td>icip-cas/PPTAgent</td><td>path traversal</td><td>python</td><td><span class="ok">caught</span></td><td><small>not flagged</small></td></tr><tr><td><a href="https://github.com/advisories/GHSA-89g2-xw5c-v95p">CVE-2026-42079</a></td><td>icip-cas/PPTAgent</td><td>code injection / eval</td><td>python</td><td><span class="bad">missed</span> <small>(eval() of LLM action lines in pptagent/apis.py not reported)</small></td><td><small>–</small></td></tr></table></div>
+<p class="sub">The selection log, every verdict, every report and the scoring script are in <code>results/cve_holdout/</code>.</p></details>
+
+<h2 id="mcptox">Poisoned tool descriptions</h2>
+<p class="sub">MCPTox (AAAI 2026, CC BY 4.0) contains real MCP tool descriptions with injected instructions. I split it by server (seed 2026), built the rules on 18 servers
+and ran the frozen rules once on the other 27 servers' 991 descriptions, which I had never looked at.</p>
+<div class="tbl"><table><tr><th>Setting</th><th>Poisoned descriptions caught</th><th>Clean descriptions flagged</th></tr>
+<tr><td>Normal</td><td>635 / 793 (80.1%)</td><td>1 / 198 (0.5%)</td></tr>
+<tr><td>Sensitive (<code>--strict</code>)</td><td>765 / 793 (96.5%)</td><td>5 / 198 (2.5%)</td></tr></table></div>
+
+<h2 id="buyer">Buyer test: a realistic support agent</h2>
+<p class="sub">A LangGraph support agent plus a TypeScript billing MCP server, an MCP client config and a vendor tool list, with 12 planted problems and 9 safe
+look-alikes (a correct path guard, a safe ping with <code>execFile</code> and <code>--</code>, an allowlisted fetch, parameterised SQL, a pinned package, a test key in tests/…).
+I wrote the expected results before the run. A fresh agent with the skill found <b>12/12</b> and confirmed <b>none</b> of the decoys, including the ones only a reader can see:
+<code>get_invoice</code> returns any customer's invoice, and <code>refund_payment</code> refunds in full with no approval although the team's own AGENTS.md says to ask over 500 EUR.
+The full report is in <code>examples/support-agent-app/</code>.</p>
+
+<h2>What your agent does with it</h2>
+<ol class="steps">
+<li><b>Scan</b>: finds MCP client configs (Claude, Cursor, VS Code, Windsurf, Gemini, Codex, Zed…), agent permission settings, MCP servers and agent code (Python, TypeScript/JavaScript), the tools they define, agent instruction files and secrets.</li>
+<li><b>Check tool lists</b>: scores exported <code>tools/list</code> JSON or pasted descriptions for hidden instructions.</li>
+<li><b>Review every candidate</b> with the guide: traces input to the dangerous call, checks whether a guard really works, marks confirmed / false positive / needs context.</li>
+<li><b>Manual pass</b> for what no script sees: authorization on every tool, token passthrough, destructive tools without confirmation, untrusted text reaching the model, the "lethal trifecta" (untrusted input + private data + a way out).</li>
+<li><b>Verify</b>: every quote must exist at the cited line; injection findings need two quotes (where the input enters and where it is used).</li>
+<li><b>Report</b>: verdict, fixes in order, dismissed items with the code that makes them safe, OWASP Top 10 for Agentic Applications mapping, and SARIF for GitHub code scanning. Optional <code>pin</code> catches "rug-pull" changes to tool definitions in CI.</li>
+</ol>
+
+<h2>Good to know</h2>
+<div class="grid">
+ <div class="card"><h3>Who it is for</h3><p>Teams shipping AI agents or MCP servers to production who need a security review with proof before launch, or in CI.</p></div>
+ <div class="card"><h3>Local and read-only</h3><p>One Python script, standard library only (Python 3.10+). It never runs, installs or connects to the code it audits and never sends anything over the network. Secrets are masked in every output.</p></div>
+ <div class="card"><h3>Proof, not scores</h3><p>Every finding cites the exact lines, and a command rejects quotes that are not in the code.</p></div>
+ <div class="card"><h3>Honest limits</h3><p>Static review: it cannot see runtime behaviour or what remote servers return later. It missed 2 of 24 advisories (an <code>eval</code> of model output, an attachment download path). The judge is an AI; a human should confirm critical fixes.</p></div>
+</div>
+
+<div class="btns" style="margin-top:34px"><a class="btn solid" href="https://www.agensi.io/creators/muhammad-shahmeer" target="_blank" rel="noopener">Get it on Agensi · $19 ↗</a><a class="btn" href="https://github.com/m-shahmeer-kz/agent-mcp-security-auditor">GitHub ↗</a></div>
+<p class="sub">Made by <a href="https://m-shahmeer-kz.github.io/">Muhammad Shahmeer</a> · Data Science MSc, University of Naples Federico II · © 2026, all rights reserved.
+MCPTox © its authors (CC BY 4.0, <a href="https://github.com/zhiqiangwang4/MCPTox-Benchmark">github.com/zhiqiangwang4/MCPTox-Benchmark</a>); only scores are published here.
+Advisories from the GitHub Advisory Database. Not affiliated with OWASP, GitHub or the MCP project.</p>
+</div></body></html>

@@ -1,0 +1,10 @@
+a6352edfc9c3c0f0a67a2da435c820d09b46b8460d6c9e84b3e971be47e6d85d  ./SKILL.md
+95c47a697678495a2e91af06dc7803ea048d077709408f6d8258e56feb1a85bc  ./references/manual-checks.md
+2d12cee8667a646e5143e3e87d736d6a82d77daf9e9dff539f2c34bb182cc00e  ./references/review-guide.md
+d4cfd8652934e9d5669239496d664e79233b120ac3342f3499a8522161522c4e  ./references/threat-model.md
+cd07f290ae1ff04b5cf259aae7f128b94c83678abf3c56986dd97ce56b82de8b  ./scripts/agentsec.py
+e235786e47f820bd2601e4f279e53f9183e37ea9f6dcbfcddec3431199175a46  ./scripts/codejs.py
+9a44649d0523cd33be53e21e0c3ce7d6f935e2a2145dc059db4db6445f7e4e11  ./scripts/codepy.py
+b1cd0c98c36030dc54e29b7714a656c16cba54f9f2179cee1468fa2c0bdac219  ./scripts/configs.py
+f8a32f526f105b7fcdcb8d1c5d26ac510e35cf8b5af8b7117aa1b58412fe49fd  ./scripts/textrules.py
+9c90a4aef971d3d620132de50e89dc5b4a3dc47f5a949bdf8cb0ce7b26d81bc7  ./templates/answer.md

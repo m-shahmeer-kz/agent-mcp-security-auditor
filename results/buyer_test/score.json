@@ -1,0 +1,10 @@
+{
+  "skill_version": "1.0.1",
+  "must_find": {"P1": true, "P2": true, "P3": true, "P4": true, "P5": true, "P6": true, "P7": true, "P8": true, "P9": true, "P10": true, "P11": true, "P12": true},
+  "found": "12/12",
+  "decoys_confirmed": "0/9 (D1 kb path guard and D2 ping_host dismissed with the guarding code; D3-D9 not confirmed)",
+  "verify_ok": true,
+  "verdicts": "17 (12 scanner candidates: 10 confirmed, 2 false positives; 5 manual M001-M005)",
+  "bug_found": "review.md (the agent's working file) showed the planted GitHub token in full inside code excerpts; report.md, report.sarif and verified.json were masked. Fixed in v1.0.2 (every excerpt line is masked; test added).",
+  "note": "Planted app and expectations were written by the developer before the run (benchmarks/buyer_test/expected.json); the auditing agent did not see them."
+}

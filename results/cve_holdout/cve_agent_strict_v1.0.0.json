@@ -1,0 +1,223 @@
+{
+ "caught": 20,
+ "ran": 24,
+ "still_flagged_after_fix": 7,
+ "rows": [
+  {
+   "id": "h01",
+   "class": "SSRF",
+   "lang": "typescript",
+   "vuln": true,
+   "fixed_still_flagged": true,
+   "vuln_hits": 1,
+   "fixed_hits": 1
+  },
+  {
+   "id": "h02",
+   "class": "OS command injection",
+   "lang": "typescript",
+   "vuln": true,
+   "fixed_still_flagged": false,
+   "vuln_hits": 6,
+   "fixed_hits": 0
+  },
+  {
+   "id": "h03",
+   "class": "OS command injection",
+   "lang": "typescript",
+   "vuln": true,
+   "fixed_still_flagged": false,
+   "vuln_hits": 16,
+   "fixed_hits": 0
+  },
+  {
+   "id": "h04",
+   "class": "OS command injection",
+   "lang": "typescript",
+   "vuln": true,
+   "fixed_still_flagged": false,
+   "vuln_hits": 4,
+   "fixed_hits": 0
+  },
+  {
+   "id": "h05",
+   "class": "OS command injection",
+   "lang": "typescript",
+   "vuln": true,
+   "fixed_still_flagged": false,
+   "vuln_hits": 1,
+   "fixed_hits": 0
+  },
+  {
+   "id": "h06",
+   "class": "OS command injection",
+   "lang": "typescript",
+   "vuln": true,
+   "fixed_still_flagged": false,
+   "vuln_hits": 4,
+   "fixed_hits": 0
+  },
+  {
+   "id": "h07",
+   "class": "OS command injection",
+   "lang": "typescript",
+   "vuln": true,
+   "fixed_still_flagged": true,
+   "vuln_hits": 1,
+   "fixed_hits": 1
+  },
+  {
+   "id": "h08",
+   "class": "SSRF",
+   "lang": "typescript",
+   "vuln": true,
+   "fixed_still_flagged": false,
+   "vuln_hits": 1,
+   "fixed_hits": 0
+  },
+  {
+   "id": "h09",
+   "class": "hardcoded secret",
+   "lang": "python",
+   "vuln": false,
+   "fixed_still_flagged": false,
+   "vuln_hits": 0,
+   "fixed_hits": 0
+  },
+  {
+   "id": "h10",
+   "class": "SSRF",
+   "lang": "typescript",
+   "vuln": true,
+   "fixed_still_flagged": true,
+   "vuln_hits": 1,
+   "fixed_hits": 1
+  },
+  {
+   "id": "h11",
+   "class": "path traversal",
+   "lang": "python",
+   "vuln": true,
+   "fixed_still_flagged": true,
+   "vuln_hits": 1,
+   "fixed_hits": 2
+  },
+  {
+   "id": "h12",
+   "class": "SSRF",
+   "lang": "python",
+   "vuln": true,
+   "fixed_still_flagged": false,
+   "vuln_hits": 1,
+   "fixed_hits": 0
+  },
+  {
+   "id": "h13",
+   "class": "SSRF",
+   "lang": "python",
+   "vuln": false,
+   "fixed_still_flagged": false,
+   "vuln_hits": 0,
+   "fixed_hits": 0
+  },
+  {
+   "id": "h14",
+   "class": "SSRF",
+   "lang": "typescript",
+   "vuln": true,
+   "fixed_still_flagged": true,
+   "vuln_hits": 4,
+   "fixed_hits": 4
+  },
+  {
+   "id": "h15",
+   "class": "missing authentication on HTTP/SSE transport",
+   "lang": "typescript",
+   "vuln": true,
+   "fixed_still_flagged": false,
+   "vuln_hits": 1,
+   "fixed_hits": 0
+  },
+  {
+   "id": "h16",
+   "class": "path traversal",
+   "lang": "typescript",
+   "vuln": true,
+   "fixed_still_flagged": false,
+   "vuln_hits": 2,
+   "fixed_hits": 0
+  },
+  {
+   "id": "h17",
+   "class": "missing authentication on HTTP/SSE transport",
+   "lang": "typescript",
+   "vuln": false,
+   "fixed_still_flagged": false,
+   "vuln_hits": 0,
+   "fixed_hits": 0
+  },
+  {
+   "id": "h18",
+   "class": "argument injection",
+   "lang": "typescript",
+   "vuln": true,
+   "fixed_still_flagged": false,
+   "vuln_hits": 1,
+   "fixed_hits": 0
+  },
+  {
+   "id": "h19",
+   "class": "path traversal",
+   "lang": "python",
+   "vuln": true,
+   "fixed_still_flagged": true,
+   "vuln_hits": 2,
+   "fixed_hits": 1
+  },
+  {
+   "id": "h20",
+   "class": "argument injection",
+   "lang": "javascript",
+   "vuln": true,
+   "fixed_still_flagged": true,
+   "vuln_hits": 2,
+   "fixed_hits": 1
+  },
+  {
+   "id": "h21",
+   "class": "SQL injection",
+   "lang": "python",
+   "vuln": true,
+   "fixed_still_flagged": false,
+   "vuln_hits": 1,
+   "fixed_hits": 0
+  },
+  {
+   "id": "h22",
+   "class": "path traversal",
+   "lang": "javascript",
+   "vuln": true,
+   "fixed_still_flagged": false,
+   "vuln_hits": 1,
+   "fixed_hits": 0
+  },
+  {
+   "id": "h23",
+   "class": "path traversal",
+   "lang": "python",
+   "vuln": true,
+   "fixed_still_flagged": false,
+   "vuln_hits": 1,
+   "fixed_hits": 0
+  },
+  {
+   "id": "h24",
+   "class": "code injection / eval",
+   "lang": "python",
+   "vuln": false,
+   "fixed_still_flagged": false,
+   "vuln_hits": 0,
+   "fixed_hits": 0
+  }
+ ]
+}

@@ -1,0 +1,127 @@
+[
+ {
+  "rule": "AUTH",
+  "title": "HTTP mode: unauthenticated callers (and any website, via CORS *) get the operator's HACKMD_API_TOKEN",
+  "verdict": "confirmed",
+  "severity": "high",
+  "evidence": [
+   {
+    "file": "index.ts",
+    "line": 152,
+    "quote": "rawConfig.hackmdApiToken || process.env.HACKMD_API_TOKEN;"
+   },
+   {
+    "file": "index.ts",
+    "line": 27,
+    "quote": "origin: process.env.CORS_ORIGIN?.split(\",\") || \"*\","
+   },
+   {
+    "file": "index.ts",
+    "line": 230,
+    "quote": "app.listen(PORT, () => {"
+   }
+  ],
+  "reason": "When TRANSPORT=http (the Docker image default) and HACKMD_API_TOKEN is set, a POST to /mcp with no token header silently uses the operator's token; the server has no auth, listens on all interfaces and allows any CORS origin, so anyone on the network or any web page the user opens can list, read, edit or delete the operator's notes.",
+  "fix": "In HTTP mode never fall back to the env token (require the per-request Hackmd-Api-Token header) or require a separate server bearer secret; bind to 127.0.0.1 by default and default CORS_ORIGIN to none.",
+  "id": "M001",
+  "quotes_verified": 3
+ },
+ {
+  "rule": "TOXIC-FLOW",
+  "title": "Reads untrusted team notes, reaches private notes, and can publish notes publicly with no approval",
+  "verdict": "confirmed",
+  "severity": "medium",
+  "evidence": [
+   {
+    "file": "tools/teamNotes.ts",
+    "line": 24,
+    "quote": "const notes = await client.getTeamNotes(teamPath);"
+   },
+   {
+    "file": "tools/userNotes.ts",
+    "line": 54,
+    "quote": "const note = await client.getNote(noteId);"
+   },
+   {
+    "file": "tools/userNotes.ts",
+    "line": 88,
+    "quote": "const note = await client.createNote(payload);"
+   },
+   {
+    "file": "utils/schemas.ts",
+    "line": 36,
+    "quote": "NotePermissionRole.GUEST,"
+   }
+  ],
+  "reason": "Note content written by other team members is returned to the model unmarked; an injected instruction can make the agent copy private notes into a new note (or update one) with readPermission 'guest', i.e. publicly readable, and nothing in the server asks for confirmation.",
+  "fix": "Drop 'guest' from readPermission/writePermission in the tool schemas (or require an explicit server flag to allow it), and have the client require approval for create/update/delete tools.",
+  "id": "M002",
+  "quotes_verified": 4
+ },
+ {
+  "rule": "NO-APPROVAL",
+  "title": "Delete tools run without confirmation",
+  "verdict": "confirmed",
+  "severity": "low",
+  "evidence": [
+   {
+    "file": "tools/userNotes.ts",
+    "line": 157,
+    "quote": "const result = await client.deleteNote(noteId);"
+   },
+   {
+    "file": "tools/teamNotes.ts",
+    "line": 130,
+    "quote": "const result = await client.deleteTeamNote(teamPath, noteId);"
+   }
+  ],
+  "reason": "delete_note / delete_team_note delete immediately; they are annotated destructiveHint: true, so protection depends on the client asking the user.",
+  "fix": "Keep the annotations, document that clients must require approval, or add a dry-run/confirm parameter.",
+  "id": "M003",
+  "quotes_verified": 2
+ },
+ {
+  "rule": "SECRET-IN-LOGS",
+  "title": "API token accepted in the URL query string (Smithery config)",
+  "verdict": "confirmed",
+  "severity": "low",
+  "evidence": [
+   {
+    "file": "index.ts",
+    "line": 99,
+    "quote": "const configParam = req.query.config;"
+   },
+   {
+    "file": "index.ts",
+    "line": 102,
+    "quote": "const smitheryConfig = JSON.parse("
+   }
+  ],
+  "reason": "The base64 config in ?config= carries hackmdApiToken, so the token ends up in reverse-proxy and access logs and browser history.",
+  "fix": "Prefer the Hackmd-Api-Token header; if the query form must stay, make sure proxies strip or do not log the query string.",
+  "id": "M004",
+  "quotes_verified": 2
+ },
+ {
+  "rule": "SSRF",
+  "title": "Client-supplied HackMD API URL (header / query config)",
+  "verdict": "false_positive",
+  "severity": "info",
+  "evidence": [
+   {
+    "file": "index.ts",
+    "line": 68,
+    "quote": "return allowedUrls.includes(url);"
+   },
+   {
+    "file": "index.ts",
+    "line": 172,
+    "quote": "if (!isAllowedApiUrl(hackmdApiUrl)) {"
+   }
+  ],
+  "reason": "Every request's API URL (from header, query config or env) is checked by exact match against ALLOWED_HACKMD_API_URLS, defaulting to only https://api.hackmd.io/v1, before the client is created.",
+  "fix": "None needed.",
+  "id": "M005",
+  "quotes_verified": 2
+ }
+]

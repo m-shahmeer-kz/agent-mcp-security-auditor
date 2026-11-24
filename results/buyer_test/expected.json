@@ -1,0 +1,29 @@
+{
+  "written_before_the_run": true,
+  "must_find": {
+    "P1": "CMD-INJECTION: run_diagnostics gateway -> traceGateway -> exec shell (mcp-billing/src/tools/diagnostics.ts traceroute line)",
+    "P2": "PATH-TRAVERSAL: export_report output_path writes anywhere (mcp-billing/src/tools/reports.ts writeFile)",
+    "P3": "SSRF: fetch_page url -> requests.get (agent/support_agent.py)",
+    "P4": "DANGEROUS-AGENT-TOOL: ShellTool given to the support agent (agent/support_agent.py)",
+    "P5": "TOOL-POISONING: invoice_formatter description in .vscode/vendor-tools.json (hidden, exfil to notes, conceal)",
+    "P6": "SECRET-IN-CONFIG: GitHub token in .mcp.json",
+    "P7": "AUTO-APPROVE: fetch autoApprove in .mcp.json",
+    "P8": "UNPINNED-PACKAGE: npx @modelcontextprotocol/server-github without a version",
+    "P9": "AUTHZ (manual): get_invoice returns any invoice by id with no check of who is asking",
+    "P10": "NO-APPROVAL (manual): refund_payment refunds in full with no confirmation / limit (AGENTS.md says ask over 500 EUR)",
+    "P11": "NETWORK-EXPOSURE / AUTH: /mcp HTTP endpoint on 0.0.0.0 with no authentication",
+    "P12": "TOXIC-FLOW / INDIRECT-INJECTION: agent reads untrusted tickets and web pages, has shell + billing tools"
+  },
+  "must_not_confirm": {
+    "D1": "read_kb_article path guard (resolve + startsWith root+sep) is correct",
+    "D2": "ping_host: execFile, regex, '--' before the value",
+    "D3": "lookup_status: fixed allowlist of URLs, not SSRF",
+    "D4": "SQL uses parameters ($1), not SQL injection",
+    "D5": "tests/test_payments.py fake test key (tests skipped by default)",
+    "D6": "search_customers description 'Call this first to get a customer id' is normal guidance",
+    "D7": "currency_convert description is clean",
+    "D8": "uvx mcp-server-fetch is pinned (==2025.4.7)",
+    "D9": "payments.ts fetch to a fixed Stripe URL is not SSRF"
+  },
+  "pass_rule": "a P item counts if a confirmed finding (any rule name) describes it at the right file; a D item fails if it is confirmed"
+}
